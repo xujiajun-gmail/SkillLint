@@ -8,6 +8,7 @@ from rich.table import Table
 
 from skilllint.config import UnknownProfileError, available_profiles, load_config
 from skilllint.core.scanner import SkillScanner
+from skilllint.evaluation import evaluate_golden_dataset, render_evaluation_markdown
 from skilllint.inputs.resolver import resolve_target
 from skilllint.reporting.console_renderer import render_console_summary
 from skilllint.reporting.json_renderer import render_json
@@ -96,6 +97,53 @@ def scan(
         render_sarif(result, output / cfg.outputs.sarif_file)
 
     render_console_summary(result)
+    console.print(f"[green]Outputs written to[/green] {output}")
+
+
+@app.command("evaluate-golden")
+def evaluate_golden(
+    dataset: Path = typer.Option(
+        Path("golden/skilllint-golden-subset.yaml"),
+        "--dataset",
+        help="Path to golden labeled subset YAML",
+    ),
+    output: Path = typer.Option(
+        Path("baselines/golden-eval"),
+        "--output",
+        help="Output directory for evaluation artifacts",
+    ),
+    profile: str | None = typer.Option(None, "--profile", help="balanced|strict|marketplace-review|ci"),
+    config: Path | None = typer.Option(None, "--config", help="Optional config file override"),
+) -> None:
+    """Evaluate SkillLint against the golden labeled subset."""
+    root = Path.cwd()
+    try:
+        result = evaluate_golden_dataset(
+            root=root,
+            dataset_path=dataset,
+            profile=profile,
+            config_path=config,
+        )
+    except UnknownProfileError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    output.mkdir(parents=True, exist_ok=True)
+    json_path = output / "golden-eval.json"
+    markdown_path = output / "golden-eval.md"
+    json_path.write_text(result.model_dump_json(indent=2), encoding="utf-8")
+    markdown_path.write_text(render_evaluation_markdown(result), encoding="utf-8")
+
+    table = Table(title="SkillLint Golden Evaluation")
+    table.add_column("Field")
+    table.add_column("Value")
+    table.add_row("Dataset", str(dataset))
+    table.add_row("Profile", result.profile)
+    table.add_row("Samples", str(result.sample_count))
+    table.add_row("Verdict accuracy", f"{result.verdict_accuracy:.3f}")
+    table.add_row("Risk minimum accuracy", f"{result.risk_min_accuracy:.3f}")
+    table.add_row("Rule micro F1", f"{result.rule_micro.f1:.3f}")
+    table.add_row("Taxonomy micro F1", f"{result.taxonomy_micro.f1:.3f}")
+    console.print(table)
     console.print(f"[green]Outputs written to[/green] {output}")
 
 

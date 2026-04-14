@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
-
 from skilllint import __version__
 from skilllint.config import SkillLintConfig
 from skilllint.core.workspace import PreparedWorkspace, cleanup_workspace, prepare_workspace
@@ -9,10 +7,11 @@ from skilllint.engines.dataflow_engine import DataflowEngine
 from skilllint.engines.package_engine import PackageEngine
 from skilllint.engines.regex_engine import RegexEngine
 from skilllint.engines.semantic_engine import SemanticEngine
-from skilllint.models import Finding, ScanResult, ScanSummary, Severity, TargetInfo
+from skilllint.models import Finding, ScanResult, TargetInfo
 from skilllint.rules.repository import get_rule_repository
 from skilllint.rules.selector import RuleSelector
-from skilllint.taxonomy.mapper import correlate_findings, map_finding_taxonomy
+from skilllint.scoring import build_score_breakdown, build_summary, correlate_findings
+from skilllint.taxonomy.mapper import map_finding_taxonomy
 from skilllint.utils.language import detect_language_from_paths, dominant_source_language
 
 
@@ -31,10 +30,12 @@ class SkillScanner:
         try:
             findings, engine_meta = self._run_engines(workspace)
             findings = [map_finding_taxonomy(f) for f in findings]
-            findings = correlate_findings(findings)
+            correlation_outcome = correlate_findings(findings)
+            findings = correlation_outcome.findings
             findings.sort(key=self._sort_key, reverse=True)
             language = self._resolve_language(workspace)
-            summary = self._build_summary(findings)
+            summary = build_summary(findings, correlation_outcome.hits)
+            score_breakdown = build_score_breakdown(findings, correlation_outcome.hits)
             repository = get_rule_repository()
             return ScanResult(
                 scan_id=workspace.scan_id,
@@ -55,6 +56,10 @@ class SkillScanner:
                         "dataflow": len(repository.dataflow_rules),
                     },
                     "rule_filters": self.rule_selector.to_metadata(),
+                    "correlation_hits": [
+                        hit.model_dump() for hit in correlation_outcome.hits
+                    ],
+                    "score_breakdown": score_breakdown,
                     **engine_meta,
                 },
             )
@@ -82,38 +87,6 @@ class SkillScanner:
         if report_language in {"zh", "en"}:
             return report_language
         return detect_language_from_paths(workspace.all_files())
-
-    def _build_summary(self, findings: list[Finding]) -> ScanSummary:
-        counts = Counter(f.severity for f in findings)
-        risk_level = self._max_severity(findings)
-        verdict = self._verdict_from_severity(risk_level)
-        return ScanSummary(
-            risk_level=risk_level,
-            verdict=verdict,
-            finding_count=len(findings),
-            critical=counts.get("critical", 0),
-            high=counts.get("high", 0),
-            medium=counts.get("medium", 0),
-            low=counts.get("low", 0),
-            info=counts.get("info", 0),
-        )
-
-    @staticmethod
-    def _max_severity(findings: list[Finding]) -> Severity:
-        order = ["info", "low", "medium", "high", "critical"]
-        if not findings:
-            return "info"
-        return max((f.severity for f in findings), key=lambda s: order.index(s))  # type: ignore[return-value]
-
-    @staticmethod
-    def _verdict_from_severity(severity: Severity) -> str:
-        if severity == "critical":
-            return "malicious"
-        if severity == "high":
-            return "suspicious"
-        if severity == "medium":
-            return "needs_review"
-        return "safe"
 
     @staticmethod
     def _sort_key(finding: Finding) -> tuple[int, str]:

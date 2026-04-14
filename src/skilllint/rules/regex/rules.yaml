@@ -24,7 +24,7 @@
 
 - rule_id: PROMPT_INJECTION_PRIORITY
   title: High-priority prompt injection phrase
-  pattern: '(?:before responding|highest priority|always do this|do not mention this to the user)'
+  pattern: '(?:before responding|always do this|do not mention this to the user)'
   severity: high
   taxonomy: SLT-A01
   tags: [markdown, semantic, pattern_match]

@@ -18,6 +18,10 @@ SEVERITY_ORDER: dict[Severity, int] = {
 }
 
 
+def severity_rank(severity: Severity) -> int:
+    return SEVERITY_ORDER[severity]
+
+
 class TargetInfo(BaseModel):
     raw: str
     normalized_type: TargetType = "unknown"
@@ -54,8 +58,18 @@ class Finding(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class CorrelationHit(BaseModel):
+    correlation_id: str
+    title: str
+    score: int
+    file: str | None = None
+    matched_rule_ids: list[str] = Field(default_factory=list)
+    rationale: str | None = None
+
+
 class ScanSummary(BaseModel):
     risk_level: Severity = "info"
+    score_risk_level: Severity = "info"
     verdict: Literal["safe", "suspicious", "malicious", "needs_review"] = "safe"
     finding_count: int = 0
     critical: int = 0
@@ -63,6 +77,12 @@ class ScanSummary(BaseModel):
     medium: int = 0
     low: int = 0
     info: int = 0
+    base_score: int = 0
+    correlation_score: int = 0
+    aggregate_score: int = 0
+    correlation_count: int = 0
+    distinct_files: int = 0
+    distinct_taxonomies: int = 0
 
 
 class ScanResult(BaseModel):

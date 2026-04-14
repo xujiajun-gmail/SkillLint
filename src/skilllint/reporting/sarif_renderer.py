@@ -61,6 +61,8 @@ def build_sarif_log(result: ScanResult) -> dict:
             "summary": result.summary.model_dump(),
             "enabled_engines": result.metadata.get("enabled_engines", []),
             "rule_filters": result.metadata.get("rule_filters", {}),
+            "correlation_hits": result.metadata.get("correlation_hits", []),
+            "score_breakdown": result.metadata.get("score_breakdown", {}),
         },
         "results": sarif_results,
         "originalUriBaseIds": {

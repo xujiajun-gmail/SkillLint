@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Golden labeled subset under `golden/skilllint-golden-subset.yaml`.
+- Synthetic evaluation fixtures under `golden/fixtures/`.
+- Golden evaluation module and `scripts/evaluate_golden_subset.py`.
+- `skilllint evaluate-golden` CLI command.
+- Documentation for golden evaluation and correlation scoring.
+
+### Improved
+- Aggregate correlation scoring in scan summaries.
+- Score breakdown metadata for top finding and correlation contributors.
+- Verdict semantics so high-risk operational skills are less likely to be overcalled as malicious.
+- Additional suppression/tuning for semantic exfiltration, permission drift, and prompt-priority false positives.
+- Expanded the shipped golden subset to 70+ adjudicated samples with better zh, package, CI, and dataflow coverage.
+
 ## [0.1.0] - 2026-04-14
 
 ### Added

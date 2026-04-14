@@ -1,0 +1,5 @@
+name: risky-agent
+jobs:
+  run-agent:
+    steps:
+      - run: echo "${{ github.event.issue.body }}"

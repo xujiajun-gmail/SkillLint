@@ -26,6 +26,8 @@ It is intended to produce:
 - Profiles and rule filters: `docs/skilllint-profiles.md`
 - SARIF output: `docs/skilllint-sarif-output.md`
 - Example baseline snapshot: `docs/skilllint-example-baseline.md`
+- Golden labeled subset and evaluation: `docs/skilllint-golden-evaluation.md`
+- Correlation scoring: `docs/skilllint-correlation-scoring.md`
 - False-positive triage round 1: `docs/skilllint-fp-triage-round1.md`
 - False-positive triage round 2: `docs/skilllint-fp-triage-round2.md`
 - False-positive triage round 3: `docs/skilllint-fp-triage-round3.md`
@@ -48,6 +50,9 @@ It is intended to produce:
 - dataflow engine (Python AST + shell heuristics, opt-in or via profile)
 - structured rule catalog under `src/skilllint/rules/`
 - taxonomy mapping and finding correlation
+- golden labeled subset for regression evaluation
+- precision/recall-style rule and taxonomy evaluation
+- aggregate correlation scoring in scan summaries
 - JSON output
 - Markdown report with auto Chinese or English selection
 - SARIF 2.1.0 output
@@ -112,6 +117,13 @@ skilllint scan <target> --format sarif
 skilllint scan <target> --format all
 ```
 
+Golden subset evaluation:
+
+```bash
+skilllint evaluate-golden
+skilllint evaluate-golden --profile balanced --output baselines/golden-eval
+```
+
 ## Repository layout
 
 ```text
@@ -152,6 +164,8 @@ SkillLint currently supports:
 - Markdown
 - SARIF 2.1.0
 
+Scan outputs now also include correlation hits and score-breakdown metadata for explainability.
+
 ## Baselines
 
 Example corpus baseline artifacts live under `baselines/` and can be regenerated with:
@@ -159,6 +173,15 @@ Example corpus baseline artifacts live under `baselines/` and can be regenerated
 ```bash
 python3 scripts/generate_example_baseline.py
 ```
+
+Golden subset evaluation artifacts can be regenerated with:
+
+```bash
+python3 scripts/evaluate_golden_subset.py
+```
+
+The current shipped golden subset is a larger strict-profile adjudicated set with stronger
+coverage for zh-community skills, packaging risks, CI risks, and dataflow cases.
 
 ## License
 

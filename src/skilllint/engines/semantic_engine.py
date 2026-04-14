@@ -149,8 +149,10 @@ class SemanticEngine(Engine):
 
         if self.permission_drift_rule is not None and self.permission_drift_rule.applies_to_path(rel) and _contains_any(
             lower, self.keyword_groups.get("read_only_claim", [])
-        ) and (
-            _contains_any(lower, self.keyword_groups.get("dangerous_capability", [])) or seed_findings
+        ) and _permission_drift_supported(
+            text=text,
+            dangerous_capability_keywords=self.keyword_groups.get("dangerous_capability", []),
+            seed_findings=seed_findings,
         ):
             line_start, line_end, snippet = _first_matching_line(
                 text,
@@ -224,6 +226,21 @@ def _semantic_rule_suppressed(rule: SemanticRule, segment: str) -> bool:
         "警告",
         "注意",
     ]
+    analytical_terms = [
+        "threat model",
+        "attacker goals",
+        "abuse paths",
+        "classify each threat",
+        "illustrative",
+        "attack class",
+        "identify entry points",
+        "entry points",
+        "trust boundaries",
+        "assets that drive risk",
+        "风险优先级",
+        "攻击路径",
+        "威胁建模",
+    ]
     explicit_concealment = [
         "do not mention",
         "without telling the user",
@@ -249,6 +266,8 @@ def _semantic_rule_suppressed(rule: SemanticRule, segment: str) -> bool:
             return False
         if any(term in lowered for term in defensive_terms):
             return True
+    if rule.rule_id == "SEMANTIC_EXFIL_MASQUERADE" and any(term in lowered for term in analytical_terms):
+        return True
     if rule.rule_id == "SEMANTIC_DESTRUCTIVE_CHAIN" and any(term in lowered for term in cleanup_terms):
         return True
     return False
@@ -278,6 +297,27 @@ def _first_matching_line(text: str, keywords: list[str]) -> tuple[int, int, str]
         if any(keyword.lower() in lowered for keyword in keywords):
             return idx, idx, extract_snippet(text, idx, idx, radius=1)
     return 1, 1, extract_snippet(text, 1, 1, radius=1)
+
+
+def _permission_drift_supported(
+    *,
+    text: str,
+    dangerous_capability_keywords: list[str],
+    seed_findings: list[Finding],
+) -> bool:
+    line_start, _, snippet = _first_matching_line(
+        text,
+        ["read-only", "only reads", "does not modify", "只读", "仅做读取", "不会修改"],
+    )
+    local_context = extract_snippet(text, line_start, line_start, radius=6).lower()
+    if _contains_any(local_context, dangerous_capability_keywords):
+        return True
+    nearby_lines = {line for line in range(max(1, line_start - 6), line_start + 7)}
+    return any(
+        finding.evidence.line_start in nearby_lines
+        for finding in seed_findings
+        if finding.evidence.line_start is not None
+    )
 
 
 

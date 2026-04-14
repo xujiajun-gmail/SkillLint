@@ -107,6 +107,8 @@ def _is_context_suppressed(rule_id: str, text: str, line_start: int, line_end: i
         "anti-pattern",
     ]
     if rule_id in {"SECRET_PATH_ACCESS", "ENV_FILE_CREDENTIAL_REFERENCE"}:
+        if any(term in context for term in defensive_terms + instructional_terms):
+            return True
         high_risk_terms = [
             "read .env",
             "cat .env",
@@ -123,8 +125,6 @@ def _is_context_suppressed(rule_id: str, text: str, line_start: int, line_end: i
             return False
         config_terms = ["configuration", "settings", "workspace structure", "check for", "cache", "inputs"]
         if ".npmrc" in context and any(term in context for term in config_terms):
-            return True
-        if any(term in context for term in defensive_terms + instructional_terms):
             return True
     if rule_id in {"DANGEROUS_SHELL_EXEC", "PERSISTENCE_MECHANISM", "DESTRUCTIVE_FILE_OPERATION", "INSTALL_CURL_PIPE_SHELL", "SUSPICIOUS_DOWNLOAD_HOST"}:
         if any(term in context for term in defensive_terms):

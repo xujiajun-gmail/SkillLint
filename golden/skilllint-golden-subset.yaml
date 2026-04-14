@@ -1,0 +1,902 @@
+version: 1
+profile: strict
+description: Expanded human-adjudicated golden subset for SkillLint with stronger zh, package, CI, dataflow, regex, and semantic
+  coverage.
+samples:
+- sample_id: safe-openai-playwright
+  local_path: examples/openai/playwright
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Browser automation workflow with explicit prerequisite checks and no hidden side-effect behavior.
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - INSTALL_CURL_PIPE_SHELL
+  - PROMPT_INJECTION_PRIORITY
+  - SECRET_PATH_ACCESS
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-A01
+  - SLT-B01
+  - SLT-A02
+  - SLT-C01
+- sample_id: safe-openai-security-best-practices
+  local_path: examples/openai/security-best-practices
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Security review/report-writing guidance; risky phrases appear only in defensive or educational context.
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - INSTALL_CURL_PIPE_SHELL
+  - PROMPT_INJECTION_PRIORITY
+  - DANGEROUS_SHELL_EXEC
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-A01
+  - SLT-A02
+  - SLT-C01
+  - SLT-E02
+- sample_id: safe-antfu-pnpm
+  local_path: examples/antfu/pnpm
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Package-manager documentation mentioning config files in benign setup context.
+  source_alias: antfu
+  community: general
+  expected_rules_absent:
+  - SECRET_PATH_ACCESS
+  - ENV_FILE_CREDENTIAL_REFERENCE
+  - DANGEROUS_SHELL_EXEC
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-E01
+  - SLT-E02
+- sample_id: safe-antfu-turborepo
+  local_path: examples/antfu/turborepo
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Build-system best practices with imperative documentation but no hidden control logic.
+  source_alias: antfu
+  community: general
+  expected_rules_absent:
+  - PROMPT_INJECTION_PRIORITY
+  - DANGEROUS_SHELL_EXEC
+  - DESTRUCTIVE_FILE_OPERATION
+  expected_taxonomies_absent:
+  - SLT-A01
+  - SLT-E02
+  - SLT-B02
+- sample_id: safe-apify-ultimate-scraper
+  local_path: examples/apify/apify-ultimate-scraper
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Mentions token prerequisites without directing covert collection or external transmission.
+  source_alias: apify
+  community: general
+  expected_rules_absent:
+  - ENV_FILE_CREDENTIAL_REFERENCE
+  - SECRET_PATH_ACCESS
+  - NETWORK_EXFIL_SEND
+  expected_taxonomies_absent:
+  - SLT-E01
+  - SLT-B01
+- sample_id: safe-openai-security-ownership-map
+  local_path: examples/openai/security-ownership-map
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Repo-analysis workflow without exfiltration or hidden-action instructions.
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - SEMANTIC_EXFIL_MASQUERADE
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  - PROMPT_INJECTION_PRIORITY
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+  - SLT-A01
+- sample_id: safe-openai-security-threat-model
+  local_path: examples/openai/security-threat-model
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Threat-modeling guidance that discusses attack classes analytically rather than operationally.
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - SEMANTIC_EXFIL_MASQUERADE
+  - NETWORK_EXFIL_SEND
+  expected_taxonomies_absent:
+  - SLT-B01
+- sample_id: safe-vercel-react-best-practices
+  local_path: examples/vercel-labs/react-best-practices
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Performance-tuning guidance; priority wording is descriptive, not coercive prompt control.
+  source_alias: vercel-labs
+  community: general
+  expected_rules_absent:
+  - PROMPT_INJECTION_PRIORITY
+  - TRIGGER_HIJACK_ANY_TASK
+  expected_taxonomies_absent:
+  - SLT-A01
+  - SLT-A05
+- sample_id: safe-zh-api-design
+  local_path: examples/zh-community/everything-claude-code-zh/api-design
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 中文 API 设计方法论，无凭证处理或隐蔽副作用。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_absent:
+  - PROMPT_INJECTION_PRIORITY
+  - SECRET_PATH_ACCESS
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-A01
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-zh-database-migrations
+  local_path: examples/zh-community/everything-claude-code-zh/database-migrations
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 中文数据库迁移文档属于正常工程操作说明。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_absent:
+  - DESTRUCTIVE_FILE_OPERATION
+  - DANGEROUS_SHELL_EXEC
+  expected_taxonomies_absent:
+  - SLT-B02
+  - SLT-E02
+- sample_id: safe-synthetic-safe-docs
+  local_path: golden/fixtures/safe-docs-skill
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 防御性文档负样本，用于验证上下文抑制保持稳定。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_absent:
+  - INSTALL_CURL_PIPE_SHELL
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-C01
+  - SLT-B01
+  - SLT-A02
+- sample_id: review-zh-pua-loop
+  local_path: examples/zh-community/tanweai-pua/pua-loop
+  expected_verdict: needs_review
+  expected_min_risk: medium
+  rationale: 明确要求从 .env 补全密钥，属于需要人工确认的中风险流程。
+  source_alias: tanweai-pua
+  community: zh
+  expected_rules_present:
+  - ENV_FILE_CREDENTIAL_REFERENCE
+  expected_taxonomies_present:
+  - SLT-E01
+- sample_id: suspicious-zh-wechat-article-writer
+  local_path: examples/zh-community/xstongxue-best-skills/wechat-article-writer
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 包含上传脚本与本地凭证处理，风险已经超过普通 review 级别。
+  source_alias: xstongxue-best-skills
+  community: zh
+  expected_rules_present:
+  - DATAFLOW_SHELL_INPUT_TO_EXEC
+  - ENV_FILE_CREDENTIAL_REFERENCE
+  expected_taxonomies_present:
+  - SLT-E02
+  - SLT-E01
+- sample_id: review-synthetic-credential-setup
+  local_path: golden/fixtures/needs-review-credential-setup
+  expected_verdict: needs_review
+  expected_min_risk: medium
+  rationale: 最小化凭证装载样本，用于验证 medium 风险与凭证规则命中。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - ENV_FILE_CREDENTIAL_REFERENCE
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  expected_taxonomies_present:
+  - SLT-E01
+- sample_id: suspicious-openai-render-deploy
+  local_path: examples/openai/render-deploy
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 包含远程安装脚本引导，供应链风险显著。
+  source_alias: openai
+  community: general
+  expected_rules_present:
+  - INSTALL_CURL_PIPE_SHELL
+  - SUSPICIOUS_DOWNLOAD_HOST
+  expected_taxonomies_present:
+  - SLT-C01
+  - SLT-C04
+- sample_id: suspicious-openai-sentry
+  local_path: examples/openai/sentry
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 远程安装步骤真实存在，但主要仍是只读查询场景。
+  source_alias: openai
+  community: general
+  expected_rules_present:
+  - INSTALL_CURL_PIPE_SHELL
+  expected_taxonomies_present:
+  - SLT-C01
+- sample_id: suspicious-zh-autonomous-loops
+  local_path: examples/zh-community/everything-claude-code-zh/autonomous-loops
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 中文自动循环样本同时包含远程安装和权限扩张信号，应高风险审查。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_present:
+  - INSTALL_CURL_PIPE_SHELL
+  - SUSPICIOUS_DOWNLOAD_HOST
+  - SEMANTIC_PERMISSION_DRIFT
+  expected_taxonomies_present:
+  - SLT-C01
+  - SLT-C04
+  - SLT-E03
+- sample_id: suspicious-vercel-cli-with-tokens
+  local_path: examples/vercel-labs/vercel-cli-with-tokens
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 从 .env 提取 token 并提示存在静默副作用，属于高风险自动化凭证流程。
+  source_alias: vercel-labs
+  community: general
+  expected_rules_present:
+  - ENV_FILE_CREDENTIAL_REFERENCE
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_present:
+  - SLT-E01
+  - SLT-A02
+- sample_id: suspicious-zh-pua
+  local_path: examples/zh-community/tanweai-pua/pua
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 明确要求静默上报事件，是隐蔽行为的直接例子。
+  source_alias: tanweai-pua
+  community: zh
+  expected_rules_present:
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_present:
+  - SLT-A02
+- sample_id: malicious-synthetic-secret-exfil
+  local_path: golden/fixtures/secret-exfil-skill
+  expected_verdict: malicious
+  expected_min_risk: critical
+  rationale: 高置信度的外传链路合成样本，用于验证 malicious verdict 与 correlation chain。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SEMANTIC_EXFIL_MASQUERADE
+  - NETWORK_EXFIL_SEND
+  - CORRELATED_SECRET_EXFIL_CHAIN
+  expected_taxonomies_present:
+  - SLT-B01
+- sample_id: malicious-synthetic-priority-exfil
+  local_path: golden/fixtures/priority-exfil-skill
+  expected_verdict: malicious
+  expected_min_risk: critical
+  rationale: 优先级覆盖 + 对话外发 + 用户隐瞒，属于典型恶意 skill 模式。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PROMPT_INJECTION_PRIORITY
+  - NETWORK_EXFIL_SEND
+  - CORRELATED_PRIORITY_EXFIL
+  expected_taxonomies_present:
+  - SLT-A01
+  - SLT-B01
+- sample_id: safe-openai-netlify-deploy
+  local_path: examples/openai/netlify-deploy
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Netlify 部署 skill 在 strict 下未暴露执行或凭证风险。
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-openai-openai-docs
+  local_path: examples/openai/openai-docs
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 文档检索与引用工作流，无隐蔽执行或外传行为。
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-openai-pdf
+  local_path: examples/openai/pdf
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: PDF 处理 skill 无危险执行路径。
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-openai-frontend-skill
+  local_path: examples/openai/frontend-skill
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 前端开发指导样本在 strict 下保持零命中。
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-openai-linear
+  local_path: examples/openai/linear
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Linear 集成说明未触发凭证外传或执行规则。
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-openai-notion-meeting-intelligence
+  local_path: examples/openai/notion-meeting-intelligence
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: Notion 会议整理工作流没有命中高风险规则。
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-openai-notion-knowledge-capture
+  local_path: examples/openai/notion-knowledge-capture
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 知识采集 guidance 不包含危险自动化指令。
+  source_alias: openai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-vercel-composition-patterns
+  local_path: examples/vercel-labs/composition-patterns
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 组合模式文档在 strict 下保持安全。
+  source_alias: vercel-labs
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-skillcreator-review-a-skill
+  local_path: examples/skillcreatorai/review-a-skill
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 技能评审 guidance 无执行或外传行为。
+  source_alias: skillcreatorai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-skillcreator-backend-development
+  local_path: examples/skillcreatorai/backend-development
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 后端开发流程 guidance 无高风险信号。
+  source_alias: skillcreatorai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-skillcreator-code-documentation
+  local_path: examples/skillcreatorai/code-documentation
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 代码文档 skill 在 strict 下保持零命中。
+  source_alias: skillcreatorai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-skillcreator-database-design
+  local_path: examples/skillcreatorai/database-design
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 数据库设计 guidance 无危险执行链。
+  source_alias: skillcreatorai
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-callstack-github-actions
+  local_path: examples/callstack/github-actions
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: GitHub Actions 文档样本未命中 CI 注入或执行风险。
+  source_alias: callstack
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-callstack-github
+  local_path: examples/callstack/github
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: GitHub 使用指导属于低风险文档样本。
+  source_alias: callstack
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-openai-system-skill-creator
+  local_path: examples/openai-system/skill-creator
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 系统内 skill-creator 说明在 strict 下仍为安全负样本。
+  source_alias: openai-system
+  community: general
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-zh-partme-github-actions
+  local_path: examples/zh-community/partme-full-stack-skills/devops-skills__github-actions
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 中文 GitHub Actions 指南未触发 CI 注入规则。
+  source_alias: partme-full-stack-skills
+  community: zh
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-zh-partme-docker
+  local_path: examples/zh-community/partme-full-stack-skills/docker-skills__docker
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 中文 Docker 指南为稳定安全样本。
+  source_alias: partme-full-stack-skills
+  community: zh
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-zh-shareai-skill-judge
+  local_path: examples/zh-community/shareai-skills/skill-judge
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 中文 skill 评审 guidance 未出现危险执行行为。
+  source_alias: shareai-skills
+  community: zh
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: safe-zh-xst-skill-create
+  local_path: examples/zh-community/xstongxue-best-skills/skill-create
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 中文 skill 创建指南在 strict 下保持零命中。
+  source_alias: xstongxue-best-skills
+  community: zh
+  expected_rules_absent:
+  - NETWORK_EXFIL_SEND
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_absent:
+  - SLT-B01
+  - SLT-A02
+- sample_id: suspicious-openai-cloudflare-deploy
+  local_path: examples/openai/cloudflare-deploy
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 参考资料中出现启动配置修改与宽泛任务劫持信号，需高优先级审查。
+  source_alias: openai
+  community: general
+  expected_rules_present:
+  - SYSTEM_PROFILE_MODIFICATION
+  - TRIGGER_HIJACK_ANY_TASK
+  - SEMANTIC_TRIGGER_HIJACK
+  expected_taxonomies_present:
+  - SLT-C04
+  - SLT-A05
+- sample_id: suspicious-zh-security-scan
+  local_path: examples/zh-community/everything-claude-code-zh/security-scan
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 中文 security-scan 样本包含隐藏行为表达。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_present:
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_present:
+  - SLT-A02
+- sample_id: suspicious-zh-security-review
+  local_path: examples/zh-community/everything-claude-code-zh/security-review
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 安全审查材料中出现敏感路径读取信号，需要人工确认。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_present:
+  - SECRET_PATH_ACCESS
+  expected_taxonomies_present:
+  - SLT-B01
+- sample_id: review-zh-docker-patterns
+  local_path: examples/zh-community/everything-claude-code-zh/docker-patterns
+  expected_verdict: needs_review
+  expected_min_risk: medium
+  rationale: Docker 样本引用 .env 凭证，属于中风险 review 项。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_present:
+  - ENV_FILE_CREDENTIAL_REFERENCE
+  expected_taxonomies_present:
+  - SLT-E01
+- sample_id: suspicious-zh-configure-ecc
+  local_path: examples/zh-community/everything-claude-code-zh/configure-ecc
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 配置脚本指导包含破坏性文件操作模式。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_present:
+  - DESTRUCTIVE_FILE_OPERATION
+  expected_taxonomies_present:
+  - SLT-B02
+- sample_id: suspicious-zh-tanweai-pro
+  local_path: examples/zh-community/tanweai-pua/pro
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 中文 PUA 变体中存在隐藏/不告知用户式行为。
+  source_alias: tanweai-pua
+  community: zh
+  expected_rules_present:
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_present:
+  - SLT-A02
+- sample_id: malicious-zh-skill-stocktake
+  local_path: examples/zh-community/everything-claude-code-zh/skill-stocktake
+  expected_verdict: malicious
+  expected_min_risk: critical
+  rationale: 多个脚本同时具备破坏性操作与 shell 输入执行，仓库级风险极高。
+  source_alias: everything-claude-code-zh
+  community: zh
+  expected_rules_present:
+  - DESTRUCTIVE_FILE_OPERATION
+  - DATAFLOW_SHELL_INPUT_TO_EXEC
+  expected_taxonomies_present:
+  - SLT-B02
+  - SLT-E02
+- sample_id: malicious-zh-agent-builder
+  local_path: examples/zh-community/shareai-skills/agent-builder
+  expected_verdict: malicious
+  expected_min_risk: critical
+  rationale: 脚本与参考代码共同形成执行链与破坏性操作，已达到 malicious 阈值。
+  source_alias: shareai-skills
+  community: zh
+  expected_rules_present:
+  - DESTRUCTIVE_FILE_OPERATION
+  - DATAFLOW_TAINTED_TO_EXEC
+  - DANGEROUS_SHELL_EXEC
+  expected_taxonomies_present:
+  - SLT-B02
+  - SLT-E02
+- sample_id: safe-synthetic-package-basic
+  local_path: golden/fixtures/safe-package-basic
+  expected_verdict: safe
+  expected_min_risk: info
+  rationale: 最小安全包结构，不应触发 package 风险。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_absent:
+  - PACKAGE_HIDDEN_FILE
+  - PACKAGE_ARCHIVE_EMBEDDED
+  - PACKAGE_SYMLINK_PRESENT
+  expected_taxonomies_absent:
+  - SLT-C04
+- sample_id: safe-synthetic-package-hidden-low
+  local_path: golden/fixtures/package-hidden-low
+  expected_verdict: safe
+  expected_min_risk: low
+  rationale: 仅包含一个隐藏文件，属于低风险 packaging 信号。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_HIDDEN_FILE
+  expected_taxonomies_present:
+  - SLT-C04
+- sample_id: safe-synthetic-package-ci-low
+  local_path: golden/fixtures/package-ci-low
+  expected_verdict: safe
+  expected_min_risk: low
+  rationale: 仅存在 workflow 文件，作为低风险 package/CI 覆盖样本。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_CI_WORKFLOW_PRESENT
+  expected_taxonomies_present:
+  - SLT-D01
+- sample_id: safe-synthetic-package-multiple-skill
+  local_path: golden/fixtures/package-multiple-skill-md
+  expected_verdict: safe
+  expected_min_risk: low
+  rationale: 重复 SKILL.md 应被识别为低风险结构问题。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_MULTIPLE_SKILL_MD
+  expected_taxonomies_present:
+  - SLT-A05
+- sample_id: review-synthetic-package-archive
+  local_path: golden/fixtures/package-archive-medium
+  expected_verdict: needs_review
+  expected_min_risk: medium
+  rationale: 嵌入归档文件需要 review 其真实用途。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_ARCHIVE_EMBEDDED
+  expected_taxonomies_present:
+  - SLT-C04
+- sample_id: review-synthetic-package-binary
+  local_path: golden/fixtures/package-binary-medium
+  expected_verdict: needs_review
+  expected_min_risk: medium
+  rationale: 二进制载荷需要人工验证。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_BINARY_PRESENT
+  expected_taxonomies_present:
+  - SLT-C04
+- sample_id: review-synthetic-package-install-script
+  local_path: golden/fixtures/package-install-script-medium
+  expected_verdict: needs_review
+  expected_min_risk: medium
+  rationale: 显式安装脚本应进入 review。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_INSTALL_SCRIPT_PRESENT
+  expected_taxonomies_present:
+  - SLT-C01
+- sample_id: review-synthetic-package-missing-skill-md
+  local_path: golden/fixtures/package-missing-skill-md
+  expected_verdict: needs_review
+  expected_min_risk: medium
+  rationale: 缺失 SKILL.md 的包结构异常，适合作为 packaging 负面样本。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_MISSING_SKILL_MD
+  expected_taxonomies_present:
+  - SLT-C04
+- sample_id: suspicious-synthetic-package-symlink
+  local_path: golden/fixtures/package-symlink-high
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 符号链接可隐藏越界读取或投毒路径，属于高风险 package 信号。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - PACKAGE_SYMLINK_PRESENT
+  expected_taxonomies_present:
+  - SLT-C04
+- sample_id: suspicious-synthetic-package-startup
+  local_path: golden/fixtures/package-startup-high
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 启动项落地 + profile 修改构成强 persistence 信号。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SYSTEM_PROFILE_MODIFICATION
+  - PACKAGE_SYSTEM_STARTUP_ARTIFACT
+  expected_taxonomies_present:
+  - SLT-C04
+- sample_id: suspicious-synthetic-ci-untrusted-workflow
+  local_path: golden/fixtures/ci-untrusted-workflow
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: CI workflow 直接把 issue 文本送入 agent prompt，是典型不可信上下文注入。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - CI_PROMPT_UNTRUSTED_CONTEXT
+  - SEMANTIC_CI_UNTRUSTED_CONTEXT
+  expected_taxonomies_present:
+  - SLT-D01
+- sample_id: malicious-synthetic-dataflow-python-secret-network
+  local_path: golden/fixtures/dataflow-python-secret-network
+  expected_verdict: malicious
+  expected_min_risk: critical
+  rationale: Python 凭证到网络的真实数据流，属于强恶意链路。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - DATAFLOW_SECRET_TO_NETWORK
+  - NETWORK_EXFIL_SEND
+  expected_taxonomies_present:
+  - SLT-B01
+- sample_id: suspicious-synthetic-dataflow-python-input-exec
+  local_path: golden/fixtures/dataflow-python-input-exec
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: Python 中不可信输入流向执行 sink，属于高危执行链。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - DATAFLOW_TAINTED_TO_EXEC
+  - DANGEROUS_SHELL_EXEC
+  expected_taxonomies_present:
+  - SLT-E02
+- sample_id: malicious-synthetic-dataflow-shell-secret-network
+  local_path: golden/fixtures/dataflow-shell-secret-network
+  expected_verdict: malicious
+  expected_min_risk: critical
+  rationale: Shell 凭证到网络外发链路，应直接判定恶意。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - DATAFLOW_SHELL_SECRET_TO_NETWORK
+  - NETWORK_EXFIL_SEND
+  expected_taxonomies_present:
+  - SLT-B01
+- sample_id: suspicious-synthetic-dataflow-shell-input-exec
+  local_path: golden/fixtures/dataflow-shell-input-exec
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: Shell 参数被拼接执行，是高风险命令执行模式。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - DATAFLOW_SHELL_INPUT_TO_EXEC
+  expected_taxonomies_present:
+  - SLT-E02
+- sample_id: malicious-synthetic-regex-reverse-shell
+  local_path: golden/fixtures/regex-reverse-shell
+  expected_verdict: malicious
+  expected_min_risk: critical
+  rationale: 反向 shell 模式是高置信度恶意信号。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - REVERSE_SHELL_PATTERN
+  expected_taxonomies_present:
+  - SLT-B06
+- sample_id: suspicious-synthetic-regex-system-profile
+  local_path: golden/fixtures/regex-system-profile
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 修改 shell profile 并建立持久化，属于强高危样本。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SYSTEM_PROFILE_MODIFICATION
+  - PERSISTENCE_MECHANISM
+  expected_taxonomies_present:
+  - SLT-C04
+  - SLT-B06
+- sample_id: suspicious-synthetic-remote-instruction-fetch
+  local_path: golden/fixtures/regex-remote-instruction-fetch
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 运行前远程拉取提示词/流程，属于动态指令注入风险。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - REMOTE_INSTRUCTION_FETCH
+  - SEMANTIC_REMOTE_DYNAMIC_INSTRUCTIONS
+  expected_taxonomies_present:
+  - SLT-C02
+- sample_id: suspicious-synthetic-semantic-credential-collection
+  local_path: golden/fixtures/semantic-credential-collection
+  expected_verdict: suspicious
+  expected_min_risk: critical
+  rationale: 直接要求用户在对话中提交密钥，应强烈告警。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SEMANTIC_CREDENTIAL_COLLECTION
+  - PASTE_API_KEY_IN_CHAT
+  expected_taxonomies_present:
+  - SLT-E01
+- sample_id: suspicious-synthetic-semantic-memory-persistence
+  local_path: golden/fixtures/semantic-memory-persistence
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 要求写入长期记忆，属于持久化风险样本。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SEMANTIC_MEMORY_PERSISTENCE
+  expected_taxonomies_present:
+  - SLT-B04
+- sample_id: suspicious-synthetic-semantic-embedded-instruction
+  local_path: golden/fixtures/semantic-embedded-instruction
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 要求遵循外部嵌入式指令，并触发工具投毒语义。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SEMANTIC_EMBEDDED_INSTRUCTION_FOLLOWING
+  - SEMANTIC_TOOL_POISONING
+  expected_taxonomies_present:
+  - SLT-A03
+  - SLT-B05
+- sample_id: suspicious-synthetic-zh-hidden-behavior
+  local_path: golden/fixtures/zh-hidden-behavior
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 中文隐藏行为样本，用于覆盖非英文 concealment 模式。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SEMANTIC_HIDDEN_BEHAVIOR
+  expected_taxonomies_present:
+  - SLT-A02
+- sample_id: suspicious-synthetic-zh-credential-collection
+  local_path: golden/fixtures/zh-credential-collection
+  expected_verdict: suspicious
+  expected_min_risk: high
+  rationale: 中文凭证索取样本，用于覆盖非英文密钥收集语义。
+  source_alias: synthetic
+  community: synthetic
+  expected_rules_present:
+  - SEMANTIC_CREDENTIAL_COLLECTION
+  expected_taxonomies_present:
+  - SLT-E01

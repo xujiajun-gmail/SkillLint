@@ -1,0 +1,2155 @@
+{
+  "generated_at": "2026-04-14T07:30:25.115156+00:00",
+  "dataset_path": "/Users/xujiajun/Developer/SkillLint/golden/skilllint-golden-subset.yaml",
+  "profile": "strict",
+  "sample_count": 71,
+  "verdict_accuracy": 1.0,
+  "risk_min_accuracy": 1.0,
+  "rule_micro": {
+    "tp": 63,
+    "fp": 0,
+    "fn": 0,
+    "tn": 74,
+    "support_positive": 63,
+    "support_negative": 74,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "taxonomy_micro": {
+    "tp": 51,
+    "fp": 0,
+    "fn": 0,
+    "tn": 69,
+    "support_positive": 51,
+    "support_negative": 69,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "verdict_confusion": {
+    "malicious": {
+      "malicious": 7
+    },
+    "needs_review": {
+      "needs_review": 7
+    },
+    "safe": {
+      "safe": 34
+    },
+    "suspicious": {
+      "suspicious": 23
+    }
+  },
+  "sample_results": [
+    {
+      "sample_id": "safe-openai-playwright",
+      "local_path": "examples/openai/playwright",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Browser automation workflow with explicit prerequisite checks and no hidden side-effect behavior."
+    },
+    {
+      "sample_id": "safe-openai-security-best-practices",
+      "local_path": "examples/openai/security-best-practices",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Security review/report-writing guidance; risky phrases appear only in defensive or educational context."
+    },
+    {
+      "sample_id": "safe-antfu-pnpm",
+      "local_path": "examples/antfu/pnpm",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Package-manager documentation mentioning config files in benign setup context."
+    },
+    {
+      "sample_id": "safe-antfu-turborepo",
+      "local_path": "examples/antfu/turborepo",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Build-system best practices with imperative documentation but no hidden control logic."
+    },
+    {
+      "sample_id": "safe-apify-ultimate-scraper",
+      "local_path": "examples/apify/apify-ultimate-scraper",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Mentions token prerequisites without directing covert collection or external transmission."
+    },
+    {
+      "sample_id": "safe-openai-security-ownership-map",
+      "local_path": "examples/openai/security-ownership-map",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Repo-analysis workflow without exfiltration or hidden-action instructions."
+    },
+    {
+      "sample_id": "safe-openai-security-threat-model",
+      "local_path": "examples/openai/security-threat-model",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Threat-modeling guidance that discusses attack classes analytically rather than operationally."
+    },
+    {
+      "sample_id": "safe-vercel-react-best-practices",
+      "local_path": "examples/vercel-labs/react-best-practices",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Performance-tuning guidance; priority wording is descriptive, not coercive prompt control."
+    },
+    {
+      "sample_id": "safe-zh-api-design",
+      "local_path": "examples/zh-community/everything-claude-code-zh/api-design",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文 API 设计方法论，无凭证处理或隐蔽副作用。"
+    },
+    {
+      "sample_id": "safe-zh-database-migrations",
+      "local_path": "examples/zh-community/everything-claude-code-zh/database-migrations",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文数据库迁移文档属于正常工程操作说明。"
+    },
+    {
+      "sample_id": "safe-synthetic-safe-docs",
+      "local_path": "golden/fixtures/safe-docs-skill",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "防御性文档负样本，用于验证上下文抑制保持稳定。"
+    },
+    {
+      "sample_id": "review-zh-pua-loop",
+      "local_path": "examples/zh-community/tanweai-pua/pua-loop",
+      "expected_verdict": "needs_review",
+      "expected_min_risk": "medium",
+      "predicted_verdict": "needs_review",
+      "predicted_risk": "medium",
+      "aggregate_score": 33,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "ENV_FILE_CREDENTIAL_REFERENCE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-E01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "明确要求从 .env 补全密钥，属于需要人工确认的中风险流程。"
+    },
+    {
+      "sample_id": "suspicious-zh-wechat-article-writer",
+      "local_path": "examples/zh-community/xstongxue-best-skills/wechat-article-writer",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 119,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DATAFLOW_SHELL_INPUT_TO_EXEC",
+        "ENV_FILE_CREDENTIAL_REFERENCE",
+        "PACKAGE_HIDDEN_FILE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C04",
+        "SLT-E01",
+        "SLT-E02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "包含上传脚本与本地凭证处理，风险已经超过普通 review 级别。"
+    },
+    {
+      "sample_id": "review-synthetic-credential-setup",
+      "local_path": "golden/fixtures/needs-review-credential-setup",
+      "expected_verdict": "needs_review",
+      "expected_min_risk": "medium",
+      "predicted_verdict": "needs_review",
+      "predicted_risk": "medium",
+      "aggregate_score": 51,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "ENV_FILE_CREDENTIAL_REFERENCE",
+        "ENV_FILE_CREDENTIAL_REFERENCE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-E01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "最小化凭证装载样本，用于验证 medium 风险与凭证规则命中。"
+    },
+    {
+      "sample_id": "suspicious-openai-render-deploy",
+      "local_path": "examples/openai/render-deploy",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 159,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "INSTALL_CURL_PIPE_SHELL",
+        "SUSPICIOUS_DOWNLOAD_HOST"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C01",
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "包含远程安装脚本引导，供应链风险显著。"
+    },
+    {
+      "sample_id": "suspicious-openai-sentry",
+      "local_path": "examples/openai/sentry",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 94,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "INSTALL_CURL_PIPE_SHELL"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "远程安装步骤真实存在，但主要仍是只读查询场景。"
+    },
+    {
+      "sample_id": "suspicious-zh-autonomous-loops",
+      "local_path": "examples/zh-community/everything-claude-code-zh/autonomous-loops",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 254,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "INSTALL_CURL_PIPE_SHELL",
+        "SEMANTIC_PERMISSION_DRIFT",
+        "SUSPICIOUS_DOWNLOAD_HOST"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C01",
+        "SLT-C04",
+        "SLT-E03"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文自动循环样本同时包含远程安装和权限扩张信号，应高风险审查。"
+    },
+    {
+      "sample_id": "suspicious-vercel-cli-with-tokens",
+      "local_path": "examples/vercel-labs/vercel-cli-with-tokens",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 173,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_HIDDEN_BEHAVIOR",
+        "ENV_FILE_CREDENTIAL_REFERENCE",
+        "ENV_FILE_CREDENTIAL_REFERENCE",
+        "ENV_FILE_CREDENTIAL_REFERENCE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A02",
+        "SLT-E01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "从 .env 提取 token 并提示存在静默副作用，属于高风险自动化凭证流程。"
+    },
+    {
+      "sample_id": "suspicious-zh-pua",
+      "local_path": "examples/zh-community/tanweai-pua/pua",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 56,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_HIDDEN_BEHAVIOR"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "明确要求静默上报事件，是隐蔽行为的直接例子。"
+    },
+    {
+      "sample_id": "malicious-synthetic-secret-exfil",
+      "local_path": "golden/fixtures/secret-exfil-skill",
+      "expected_verdict": "malicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "malicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 143,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "CORRELATED_SECRET_EXFIL_CHAIN",
+        "SEMANTIC_EXFIL_MASQUERADE",
+        "NETWORK_EXFIL_SEND"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "高置信度的外传链路合成样本，用于验证 malicious verdict 与 correlation chain。"
+    },
+    {
+      "sample_id": "malicious-synthetic-priority-exfil",
+      "local_path": "golden/fixtures/priority-exfil-skill",
+      "expected_verdict": "malicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "malicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 362,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "CORRELATED_SECRET_EXFIL_CHAIN",
+        "CORRELATED_PRIORITY_EXFIL",
+        "SEMANTIC_HIDDEN_BEHAVIOR",
+        "SEMANTIC_EXFIL_MASQUERADE",
+        "PROMPT_INJECTION_PRIORITY",
+        "PROMPT_INJECTION_PRIORITY",
+        "NETWORK_EXFIL_SEND"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A01",
+        "SLT-A02",
+        "SLT-B01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "优先级覆盖 + 对话外发 + 用户隐瞒，属于典型恶意 skill 模式。"
+    },
+    {
+      "sample_id": "safe-openai-netlify-deploy",
+      "local_path": "examples/openai/netlify-deploy",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Netlify 部署 skill 在 strict 下未暴露执行或凭证风险。"
+    },
+    {
+      "sample_id": "safe-openai-openai-docs",
+      "local_path": "examples/openai/openai-docs",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "文档检索与引用工作流，无隐蔽执行或外传行为。"
+    },
+    {
+      "sample_id": "safe-openai-pdf",
+      "local_path": "examples/openai/pdf",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "PDF 处理 skill 无危险执行路径。"
+    },
+    {
+      "sample_id": "safe-openai-frontend-skill",
+      "local_path": "examples/openai/frontend-skill",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "前端开发指导样本在 strict 下保持零命中。"
+    },
+    {
+      "sample_id": "safe-openai-linear",
+      "local_path": "examples/openai/linear",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Linear 集成说明未触发凭证外传或执行规则。"
+    },
+    {
+      "sample_id": "safe-openai-notion-meeting-intelligence",
+      "local_path": "examples/openai/notion-meeting-intelligence",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Notion 会议整理工作流没有命中高风险规则。"
+    },
+    {
+      "sample_id": "safe-openai-notion-knowledge-capture",
+      "local_path": "examples/openai/notion-knowledge-capture",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "知识采集 guidance 不包含危险自动化指令。"
+    },
+    {
+      "sample_id": "safe-vercel-composition-patterns",
+      "local_path": "examples/vercel-labs/composition-patterns",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "组合模式文档在 strict 下保持安全。"
+    },
+    {
+      "sample_id": "safe-skillcreator-review-a-skill",
+      "local_path": "examples/skillcreatorai/review-a-skill",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "技能评审 guidance 无执行或外传行为。"
+    },
+    {
+      "sample_id": "safe-skillcreator-backend-development",
+      "local_path": "examples/skillcreatorai/backend-development",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "后端开发流程 guidance 无高风险信号。"
+    },
+    {
+      "sample_id": "safe-skillcreator-code-documentation",
+      "local_path": "examples/skillcreatorai/code-documentation",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "代码文档 skill 在 strict 下保持零命中。"
+    },
+    {
+      "sample_id": "safe-skillcreator-database-design",
+      "local_path": "examples/skillcreatorai/database-design",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "数据库设计 guidance 无危险执行链。"
+    },
+    {
+      "sample_id": "safe-callstack-github-actions",
+      "local_path": "examples/callstack/github-actions",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "GitHub Actions 文档样本未命中 CI 注入或执行风险。"
+    },
+    {
+      "sample_id": "safe-callstack-github",
+      "local_path": "examples/callstack/github",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "GitHub 使用指导属于低风险文档样本。"
+    },
+    {
+      "sample_id": "safe-openai-system-skill-creator",
+      "local_path": "examples/openai-system/skill-creator",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "系统内 skill-creator 说明在 strict 下仍为安全负样本。"
+    },
+    {
+      "sample_id": "safe-zh-partme-github-actions",
+      "local_path": "examples/zh-community/partme-full-stack-skills/devops-skills__github-actions",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文 GitHub Actions 指南未触发 CI 注入规则。"
+    },
+    {
+      "sample_id": "safe-zh-partme-docker",
+      "local_path": "examples/zh-community/partme-full-stack-skills/docker-skills__docker",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文 Docker 指南为稳定安全样本。"
+    },
+    {
+      "sample_id": "safe-zh-shareai-skill-judge",
+      "local_path": "examples/zh-community/shareai-skills/skill-judge",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文 skill 评审 guidance 未出现危险执行行为。"
+    },
+    {
+      "sample_id": "safe-zh-xst-skill-create",
+      "local_path": "examples/zh-community/xstongxue-best-skills/skill-create",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文 skill 创建指南在 strict 下保持零命中。"
+    },
+    {
+      "sample_id": "suspicious-openai-cloudflare-deploy",
+      "local_path": "examples/openai/cloudflare-deploy",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 148,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SYSTEM_PROFILE_MODIFICATION",
+        "TRIGGER_HIJACK_ANY_TASK",
+        "SEMANTIC_TRIGGER_HIJACK"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A05",
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "参考资料中出现启动配置修改与宽泛任务劫持信号，需高优先级审查。"
+    },
+    {
+      "sample_id": "suspicious-zh-security-scan",
+      "local_path": "examples/zh-community/everything-claude-code-zh/security-scan",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 56,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_HIDDEN_BEHAVIOR"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文 security-scan 样本包含隐藏行为表达。"
+    },
+    {
+      "sample_id": "suspicious-zh-security-review",
+      "local_path": "examples/zh-community/everything-claude-code-zh/security-review",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 64,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SECRET_PATH_ACCESS"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "安全审查材料中出现敏感路径读取信号，需要人工确认。"
+    },
+    {
+      "sample_id": "review-zh-docker-patterns",
+      "local_path": "examples/zh-community/everything-claude-code-zh/docker-patterns",
+      "expected_verdict": "needs_review",
+      "expected_min_risk": "medium",
+      "predicted_verdict": "needs_review",
+      "predicted_risk": "medium",
+      "aggregate_score": 33,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "ENV_FILE_CREDENTIAL_REFERENCE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-E01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Docker 样本引用 .env 凭证，属于中风险 review 项。"
+    },
+    {
+      "sample_id": "suspicious-zh-configure-ecc",
+      "local_path": "examples/zh-community/everything-claude-code-zh/configure-ecc",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 114,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DESTRUCTIVE_FILE_OPERATION",
+        "DESTRUCTIVE_FILE_OPERATION"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "配置脚本指导包含破坏性文件操作模式。"
+    },
+    {
+      "sample_id": "suspicious-zh-tanweai-pro",
+      "local_path": "examples/zh-community/tanweai-pua/pro",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 56,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_HIDDEN_BEHAVIOR"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文 PUA 变体中存在隐藏/不告知用户式行为。"
+    },
+    {
+      "sample_id": "malicious-zh-skill-stocktake",
+      "local_path": "examples/zh-community/everything-claude-code-zh/skill-stocktake",
+      "expected_verdict": "malicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "malicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 271,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DESTRUCTIVE_FILE_OPERATION",
+        "DESTRUCTIVE_FILE_OPERATION",
+        "DATAFLOW_SHELL_INPUT_TO_EXEC",
+        "DATAFLOW_SHELL_INPUT_TO_EXEC",
+        "DATAFLOW_SHELL_INPUT_TO_EXEC"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B02",
+        "SLT-E02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "多个脚本同时具备破坏性操作与 shell 输入执行，仓库级风险极高。"
+    },
+    {
+      "sample_id": "malicious-zh-agent-builder",
+      "local_path": "examples/zh-community/shareai-skills/agent-builder",
+      "expected_verdict": "malicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "malicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 290,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DESTRUCTIVE_FILE_OPERATION",
+        "DATAFLOW_TAINTED_TO_EXEC",
+        "DANGEROUS_SHELL_EXEC",
+        "DANGEROUS_SHELL_EXEC"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B02",
+        "SLT-E02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "脚本与参考代码共同形成执行链与破坏性操作，已达到 malicious 阈值。"
+    },
+    {
+      "sample_id": "safe-synthetic-package-basic",
+      "local_path": "golden/fixtures/safe-package-basic",
+      "expected_verdict": "safe",
+      "expected_min_risk": "info",
+      "predicted_verdict": "safe",
+      "predicted_risk": "info",
+      "aggregate_score": 0,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [],
+      "predicted_taxonomies": [],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "最小安全包结构，不应触发 package 风险。"
+    },
+    {
+      "sample_id": "safe-synthetic-package-hidden-low",
+      "local_path": "golden/fixtures/package-hidden-low",
+      "expected_verdict": "safe",
+      "expected_min_risk": "low",
+      "predicted_verdict": "safe",
+      "predicted_risk": "low",
+      "aggregate_score": 14,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_HIDDEN_FILE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "仅包含一个隐藏文件，属于低风险 packaging 信号。"
+    },
+    {
+      "sample_id": "safe-synthetic-package-ci-low",
+      "local_path": "golden/fixtures/package-ci-low",
+      "expected_verdict": "safe",
+      "expected_min_risk": "low",
+      "predicted_verdict": "safe",
+      "predicted_risk": "low",
+      "aggregate_score": 14,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_CI_WORKFLOW_PRESENT"
+      ],
+      "predicted_taxonomies": [
+        "SLT-D01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "仅存在 workflow 文件，作为低风险 package/CI 覆盖样本。"
+    },
+    {
+      "sample_id": "safe-synthetic-package-multiple-skill",
+      "local_path": "golden/fixtures/package-multiple-skill-md",
+      "expected_verdict": "safe",
+      "expected_min_risk": "low",
+      "predicted_verdict": "safe",
+      "predicted_risk": "low",
+      "aggregate_score": 17,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_MULTIPLE_SKILL_MD"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A05"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "重复 SKILL.md 应被识别为低风险结构问题。"
+    },
+    {
+      "sample_id": "review-synthetic-package-archive",
+      "local_path": "golden/fixtures/package-archive-medium",
+      "expected_verdict": "needs_review",
+      "expected_min_risk": "medium",
+      "predicted_verdict": "needs_review",
+      "predicted_risk": "medium",
+      "aggregate_score": 37,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_ARCHIVE_EMBEDDED"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "嵌入归档文件需要 review 其真实用途。"
+    },
+    {
+      "sample_id": "review-synthetic-package-binary",
+      "local_path": "golden/fixtures/package-binary-medium",
+      "expected_verdict": "needs_review",
+      "expected_min_risk": "medium",
+      "predicted_verdict": "needs_review",
+      "predicted_risk": "medium",
+      "aggregate_score": 37,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_BINARY_PRESENT"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "二进制载荷需要人工验证。"
+    },
+    {
+      "sample_id": "review-synthetic-package-install-script",
+      "local_path": "golden/fixtures/package-install-script-medium",
+      "expected_verdict": "needs_review",
+      "expected_min_risk": "medium",
+      "predicted_verdict": "needs_review",
+      "predicted_risk": "medium",
+      "aggregate_score": 37,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_INSTALL_SCRIPT_PRESENT"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "显式安装脚本应进入 review。"
+    },
+    {
+      "sample_id": "review-synthetic-package-missing-skill-md",
+      "local_path": "golden/fixtures/package-missing-skill-md",
+      "expected_verdict": "needs_review",
+      "expected_min_risk": "medium",
+      "predicted_verdict": "needs_review",
+      "predicted_risk": "medium",
+      "aggregate_score": 37,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_MISSING_SKILL_MD"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "缺失 SKILL.md 的包结构异常，适合作为 packaging 负面样本。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-package-symlink",
+      "local_path": "golden/fixtures/package-symlink-high",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 62,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "PACKAGE_SYMLINK_PRESENT"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "符号链接可隐藏越界读取或投毒路径，属于高风险 package 信号。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-package-startup",
+      "local_path": "golden/fixtures/package-startup-high",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 177,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SYSTEM_PROFILE_MODIFICATION",
+        "PACKAGE_SYSTEM_STARTUP_ARTIFACT",
+        "PACKAGE_HIDDEN_FILE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "启动项落地 + profile 修改构成强 persistence 信号。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-ci-untrusted-workflow",
+      "local_path": "golden/fixtures/ci-untrusted-workflow",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 171,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_CI_UNTRUSTED_CONTEXT",
+        "CI_PROMPT_UNTRUSTED_CONTEXT",
+        "PACKAGE_CI_WORKFLOW_PRESENT"
+      ],
+      "predicted_taxonomies": [
+        "SLT-D01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "CI workflow 直接把 issue 文本送入 agent prompt，是典型不可信上下文注入。"
+    },
+    {
+      "sample_id": "malicious-synthetic-dataflow-python-secret-network",
+      "local_path": "golden/fixtures/dataflow-python-secret-network",
+      "expected_verdict": "malicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "malicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 128,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DATAFLOW_SECRET_TO_NETWORK",
+        "NETWORK_EXFIL_SEND"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Python 凭证到网络的真实数据流，属于强恶意链路。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-dataflow-python-input-exec",
+      "local_path": "golden/fixtures/dataflow-python-input-exec",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 149,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DATAFLOW_TAINTED_TO_EXEC",
+        "DANGEROUS_SHELL_EXEC"
+      ],
+      "predicted_taxonomies": [
+        "SLT-E02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Python 中不可信输入流向执行 sink，属于高危执行链。"
+    },
+    {
+      "sample_id": "malicious-synthetic-dataflow-shell-secret-network",
+      "local_path": "golden/fixtures/dataflow-shell-secret-network",
+      "expected_verdict": "malicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "malicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 128,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DATAFLOW_SHELL_SECRET_TO_NETWORK",
+        "NETWORK_EXFIL_SEND"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Shell 凭证到网络外发链路，应直接判定恶意。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-dataflow-shell-input-exec",
+      "local_path": "golden/fixtures/dataflow-shell-input-exec",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 60,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "DATAFLOW_SHELL_INPUT_TO_EXEC"
+      ],
+      "predicted_taxonomies": [
+        "SLT-E02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "Shell 参数被拼接执行，是高风险命令执行模式。"
+    },
+    {
+      "sample_id": "malicious-synthetic-regex-reverse-shell",
+      "local_path": "golden/fixtures/regex-reverse-shell",
+      "expected_verdict": "malicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "malicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 94,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "REVERSE_SHELL_PATTERN"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B06"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "反向 shell 模式是高置信度恶意信号。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-regex-system-profile",
+      "local_path": "golden/fixtures/regex-system-profile",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 143,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SYSTEM_PROFILE_MODIFICATION",
+        "PERSISTENCE_MECHANISM"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B06",
+        "SLT-C04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "修改 shell profile 并建立持久化，属于强高危样本。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-remote-instruction-fetch",
+      "local_path": "golden/fixtures/regex-remote-instruction-fetch",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 135,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_REMOTE_DYNAMIC_INSTRUCTIONS",
+        "REMOTE_INSTRUCTION_FETCH"
+      ],
+      "predicted_taxonomies": [
+        "SLT-C02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "运行前远程拉取提示词/流程，属于动态指令注入风险。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-semantic-credential-collection",
+      "local_path": "golden/fixtures/semantic-credential-collection",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "critical",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "critical",
+      "aggregate_score": 145,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_CREDENTIAL_COLLECTION",
+        "PASTE_API_KEY_IN_CHAT"
+      ],
+      "predicted_taxonomies": [
+        "SLT-E01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "直接要求用户在对话中提交密钥，应强烈告警。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-semantic-memory-persistence",
+      "local_path": "golden/fixtures/semantic-memory-persistence",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 56,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_MEMORY_PERSISTENCE"
+      ],
+      "predicted_taxonomies": [
+        "SLT-B04"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "要求写入长期记忆，属于持久化风险样本。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-semantic-embedded-instruction",
+      "local_path": "golden/fixtures/semantic-embedded-instruction",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 137,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_TOOL_POISONING",
+        "SEMANTIC_EMBEDDED_INSTRUCTION_FOLLOWING"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A03",
+        "SLT-B05"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "要求遵循外部嵌入式指令，并触发工具投毒语义。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-zh-hidden-behavior",
+      "local_path": "golden/fixtures/zh-hidden-behavior",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 56,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_HIDDEN_BEHAVIOR"
+      ],
+      "predicted_taxonomies": [
+        "SLT-A02"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文隐藏行为样本，用于覆盖非英文 concealment 模式。"
+    },
+    {
+      "sample_id": "suspicious-synthetic-zh-credential-collection",
+      "local_path": "golden/fixtures/zh-credential-collection",
+      "expected_verdict": "suspicious",
+      "expected_min_risk": "high",
+      "predicted_verdict": "suspicious",
+      "predicted_risk": "high",
+      "aggregate_score": 56,
+      "verdict_match": true,
+      "risk_match": true,
+      "predicted_rules": [
+        "SEMANTIC_CREDENTIAL_COLLECTION"
+      ],
+      "predicted_taxonomies": [
+        "SLT-E01"
+      ],
+      "expected_rule_misses": [],
+      "unexpected_rules": [],
+      "expected_taxonomy_misses": [],
+      "unexpected_taxonomies": [],
+      "rationale": "中文凭证索取样本，用于覆盖非英文密钥收集语义。"
+    }
+  ],
+  "rule_metrics": {
+    "CI_PROMPT_UNTRUSTED_CONTEXT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "CORRELATED_PRIORITY_EXFIL": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "CORRELATED_SECRET_EXFIL_CHAIN": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DANGEROUS_SHELL_EXEC": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 4,
+      "support_positive": 2,
+      "support_negative": 4,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DATAFLOW_SECRET_TO_NETWORK": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DATAFLOW_SHELL_INPUT_TO_EXEC": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 3,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DATAFLOW_SHELL_SECRET_TO_NETWORK": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DATAFLOW_TAINTED_TO_EXEC": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 2,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DESTRUCTIVE_FILE_OPERATION": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "support_positive": 3,
+      "support_negative": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "ENV_FILE_CREDENTIAL_REFERENCE": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "support_positive": 5,
+      "support_negative": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "INSTALL_CURL_PIPE_SHELL": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 3,
+      "support_positive": 3,
+      "support_negative": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "NETWORK_EXFIL_SEND": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 23,
+      "support_positive": 4,
+      "support_negative": 23,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_ARCHIVE_EMBEDDED": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "support_positive": 1,
+      "support_negative": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_BINARY_PRESENT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_CI_WORKFLOW_PRESENT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_HIDDEN_FILE": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "support_positive": 1,
+      "support_negative": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_INSTALL_SCRIPT_PRESENT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_MISSING_SKILL_MD": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_MULTIPLE_SKILL_MD": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_SYMLINK_PRESENT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "support_positive": 1,
+      "support_negative": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PACKAGE_SYSTEM_STARTUP_ARTIFACT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PASTE_API_KEY_IN_CHAT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PERSISTENCE_MECHANISM": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PROMPT_INJECTION_PRIORITY": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 6,
+      "support_positive": 1,
+      "support_negative": 6,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "REMOTE_INSTRUCTION_FETCH": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "REVERSE_SHELL_PATTERN": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SECRET_PATH_ACCESS": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 4,
+      "support_positive": 1,
+      "support_negative": 4,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_CI_UNTRUSTED_CONTEXT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_CREDENTIAL_COLLECTION": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 2,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_EMBEDDED_INSTRUCTION_FOLLOWING": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_EXFIL_MASQUERADE": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "support_positive": 1,
+      "support_negative": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_HIDDEN_BEHAVIOR": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "tn": 24,
+      "support_positive": 5,
+      "support_negative": 24,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_MEMORY_PERSISTENCE": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_PERMISSION_DRIFT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_REMOTE_DYNAMIC_INSTRUCTIONS": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_TOOL_POISONING": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SEMANTIC_TRIGGER_HIJACK": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SUSPICIOUS_DOWNLOAD_HOST": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 2,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SYSTEM_PROFILE_MODIFICATION": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 3,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "TRIGGER_HIJACK_ANY_TASK": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "support_positive": 1,
+      "support_negative": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "taxonomy_metrics": {
+    "SLT-A01": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 6,
+      "support_positive": 1,
+      "support_negative": 6,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-A02": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "tn": 24,
+      "support_positive": 5,
+      "support_negative": 24,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-A03": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-A05": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "support_positive": 2,
+      "support_negative": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-B01": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "tn": 26,
+      "support_positive": 5,
+      "support_negative": 26,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-B02": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "support_positive": 3,
+      "support_negative": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-B04": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-B05": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-B06": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 2,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-C01": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "tn": 3,
+      "support_positive": 4,
+      "support_negative": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-C02": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-C04": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "tn": 1,
+      "support_positive": 10,
+      "support_negative": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-D01": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 2,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-E01": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "tn": 2,
+      "support_positive": 7,
+      "support_negative": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-E02": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "tn": 4,
+      "support_positive": 5,
+      "support_negative": 4,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "SLT-E03": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "support_positive": 1,
+      "support_negative": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  }
+}
