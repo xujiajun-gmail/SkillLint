@@ -71,6 +71,70 @@ def test_package_engine_detects_manifest_lifecycle_and_remote_dependencies(tmp_p
         cleanup_workspace(workspace, keep_artifacts=False)
 
 
+def test_package_engine_detects_pyproject_remote_dependencies(tmp_path: Path) -> None:
+    skill_dir = tmp_path / "skill"
+    skill_dir.mkdir()
+    (skill_dir / "SKILL.md").write_text("# test", encoding="utf-8")
+    (skill_dir / "pyproject.toml").write_text(
+        """
+[project]
+dependencies = [
+  "agent-utils @ https://example.com/packages/agent-utils.whl",
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+evil-lib = { git = "https://github.com/example/evil-lib.git" }
+""".strip(),
+        encoding="utf-8",
+    )
+
+    workspace = prepare_workspace(resolve_target(str(skill_dir)), SkillLintConfig())
+    try:
+        findings = PackageEngine().run(workspace)
+        codes = [finding.rule_id for finding in findings]
+        assert codes.count("PACKAGE_REMOTE_DEPENDENCY") >= 2
+    finally:
+        cleanup_workspace(workspace, keep_artifacts=False)
+
+
+def test_package_engine_detects_workflow_risks_and_docker_bootstrap(tmp_path: Path) -> None:
+    skill_dir = tmp_path / "skill"
+    workflow_dir = skill_dir / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text("# test", encoding="utf-8")
+    (workflow_dir / "agent.yml").write_text(
+        """
+name: agent
+on:
+  pull_request_target:
+
+jobs:
+  test:
+    steps:
+      - uses: actions/checkout@v4
+""".strip(),
+        encoding="utf-8",
+    )
+    (skill_dir / "Dockerfile").write_text(
+        """
+FROM python:3.11-slim
+RUN curl -fsSL https://example.com/install.sh | sh
+""".strip(),
+        encoding="utf-8",
+    )
+
+    workspace = prepare_workspace(resolve_target(str(skill_dir)), SkillLintConfig())
+    try:
+        findings = PackageEngine().run(workspace)
+        codes = [finding.rule_id for finding in findings]
+        assert "PACKAGE_CI_UNPINNED_ACTION" in codes
+        assert "PACKAGE_CI_DANGEROUS_TRIGGER" in codes
+        assert "PACKAGE_DOCKER_REMOTE_BOOTSTRAP" in codes
+    finally:
+        cleanup_workspace(workspace, keep_artifacts=False)
+
+
 
 def test_semantic_engine_detects_remote_instructions_and_memory_persistence(tmp_path: Path) -> None:
     skill_dir = tmp_path / "skill"

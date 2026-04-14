@@ -97,3 +97,30 @@ rules:
     explanation: Direct URL or VCS-based dependencies bypass normal registry review and can expand supply-chain risk.
     remediation: Prefer pinned registry releases with provenance, or explicitly review and lock remote dependencies before distribution.
     confidence: high
+
+  - rule_id: PACKAGE_CI_UNPINNED_ACTION
+    title: CI workflow uses unpinned third-party action
+    severity: medium
+    taxonomy: SLT-D01
+    tags: [package_structure, workflow, supply_chain]
+    explanation: GitHub Actions references that use mutable tags instead of full commit SHAs increase supply-chain risk in automation.
+    remediation: Pin third-party actions to full commit SHAs and review updates explicitly.
+    confidence: high
+
+  - rule_id: PACKAGE_CI_DANGEROUS_TRIGGER
+    title: CI workflow uses high-risk trigger
+    severity: medium
+    taxonomy: SLT-D01
+    tags: [package_structure, workflow, automation]
+    explanation: Triggers such as pull_request_target can combine repository secrets or elevated permissions with attacker-controlled input.
+    remediation: Restrict high-risk triggers, isolate secrets, and avoid running agentic workflows on untrusted contexts.
+    confidence: high
+
+  - rule_id: PACKAGE_DOCKER_REMOTE_BOOTSTRAP
+    title: Dockerfile bootstraps from remote content
+    severity: high
+    taxonomy: SLT-C01
+    tags: [package_structure, docker, supply_chain]
+    explanation: The Dockerfile downloads or executes remote content during image build, which can introduce unreviewed supply-chain behavior.
+    remediation: Prefer pinned local artifacts, verify integrity, and avoid piping remote content directly to a shell.
+    confidence: high

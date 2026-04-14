@@ -20,15 +20,28 @@ PY_SOURCE_CALLS = {
 PY_NETWORK_CALLS = {
     "requests.post",
     "requests.put",
+    "requests.Session.post",
+    "requests.Session.put",
     "httpx.post",
     "httpx.put",
+    "httpx.Client.post",
+    "httpx.Client.put",
+    "httpx.AsyncClient.post",
+    "httpx.AsyncClient.put",
+    "aiohttp.ClientSession.post",
+    "aiohttp.ClientSession.put",
     "urllib.request.urlopen",
     "urllib.request.Request",
 }
 PY_EXEC_CALLS = {
     "os.system",
+    "os.popen",
     "subprocess.run",
+    "subprocess.call",
+    "subprocess.check_call",
+    "subprocess.check_output",
     "subprocess.Popen",
+    "asyncio.create_subprocess_shell",
     "eval",
     "exec",
 }
@@ -85,6 +98,12 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
         self.current_function_args = prev
 
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        prev = self.current_function_args.copy()
+        self.current_function_args = {arg.arg for arg in node.args.args}
+        self.generic_visit(node)
+        self.current_function_args = prev
+
     def visit_Assign(self, node: ast.Assign) -> None:
         taint = self._taint_from_expr(node.value)
         if taint is not None:
@@ -101,9 +120,16 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
                     self.taints[name] = taint
         self.generic_visit(node)
 
+    def visit_AugAssign(self, node: ast.AugAssign) -> None:
+        taint = self._taint_from_expr(node.value)
+        if taint is not None:
+            for name in _extract_names(node.target):
+                self.taints[name] = taint
+        self.generic_visit(node)
+
     def visit_Call(self, node: ast.Call) -> None:
         call_name = _call_name(node)
-        if call_name in PY_NETWORK_CALLS and "DATAFLOW_SECRET_TO_NETWORK" in self.rules:
+        if _is_python_network_sink(call_name) and "DATAFLOW_SECRET_TO_NETWORK" in self.rules:
             tainted = self._find_tainted_args(node)
             if tainted:
                 self.findings.append(
@@ -114,7 +140,7 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
                         detail=tainted.detail,
                     )
                 )
-        if call_name in PY_EXEC_CALLS and "DATAFLOW_TAINTED_TO_EXEC" in self.rules:
+        if _is_python_exec_sink(call_name) and "DATAFLOW_TAINTED_TO_EXEC" in self.rules:
             tainted = self._find_tainted_args(node, include_function_args=True)
             if tainted:
                 title = self.rules["DATAFLOW_TAINTED_TO_EXEC"].title
@@ -145,8 +171,15 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
             if include_function_args and node.id in self.current_function_args:
                 return Taint(kind="function-arg", lineno=node.lineno, detail=f"function argument: {node.id}")
             return None
+        if isinstance(node, ast.Attribute):
+            base = self._taint_from_expr(node.value, include_function_args=include_function_args)
+            if base is not None:
+                return base
+            return None
         if isinstance(node, ast.Subscript) and _looks_like_os_environ(node):
             return Taint(kind="env", lineno=node.lineno, detail="os.environ access")
+        if isinstance(node, ast.Subscript):
+            return self._taint_from_expr(node.value, include_function_args=include_function_args)
         if isinstance(node, ast.Call):
             call_name = _call_name(node)
             if call_name in PY_SOURCE_CALLS:
@@ -155,6 +188,15 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
                 secret_path = _string_constant(node.args[0])
                 if secret_path and _is_secret_path(secret_path):
                     return Taint(kind="secret-file", lineno=node.lineno, detail=secret_path)
+            if call_name in {"Path", "pathlib.Path"} and node.args:
+                secret_path = _string_constant(node.args[0])
+                if secret_path and _is_secret_path(secret_path):
+                    return Taint(kind="secret-file", lineno=node.lineno, detail=secret_path)
+            if isinstance(node.func, ast.Attribute) and node.func.attr in {"read_text", "read_bytes"}:
+                return self._taint_from_expr(node.func.value, include_function_args=include_function_args)
+            if call_name in {"Path.read_text", "Path.read_bytes", "pathlib.Path.read_text", "pathlib.Path.read_bytes"}:
+                if isinstance(node.func, ast.Attribute):
+                    return self._taint_from_expr(node.func.value, include_function_args=include_function_args)
             for arg in list(node.args) + [kw.value for kw in node.keywords]:
                 inner = self._taint_from_expr(arg, include_function_args=include_function_args)
                 if inner is not None:
@@ -313,6 +355,34 @@ def _call_name(node: ast.Call) -> str | None:
             parts.append(current.id)
         return ".".join(reversed(parts))
     return None
+
+
+
+def _is_python_network_sink(call_name: str | None) -> bool:
+    if call_name is None:
+        return False
+    if call_name in PY_NETWORK_CALLS:
+        return True
+    return call_name.endswith((".post", ".put", ".urlopen", ".request"))
+
+
+
+def _is_python_exec_sink(call_name: str | None) -> bool:
+    if call_name is None:
+        return False
+    if call_name in PY_EXEC_CALLS:
+        return True
+    return call_name.endswith(
+        (
+            ".run",
+            ".call",
+            ".check_call",
+            ".check_output",
+            ".Popen",
+            ".popen",
+            ".create_subprocess_shell",
+        )
+    )
 
 
 
