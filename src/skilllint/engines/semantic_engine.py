@@ -23,6 +23,7 @@ class SemanticEngine(Engine):
         self.selector = selector or RuleSelector()
         self.llm = LLMAnalyzer(config)
         self.last_llm_status = "disabled"
+        self.last_llm_debug_records: list[dict] = []
         repository = get_rule_repository()
         self.keyword_groups = repository.semantic_keyword_groups
         self.catalog_rules = [
@@ -81,8 +82,10 @@ class SemanticEngine(Engine):
         if self.config.engines.semantic.use_llm:
             findings.extend(self.llm.analyze(_unique_candidates(llm_candidates)))
             self.last_llm_status = self.llm.status
+            self.last_llm_debug_records = self.llm.debug_records
         else:
             self.last_llm_status = "disabled"
+            self.last_llm_debug_records = []
 
         return findings
 

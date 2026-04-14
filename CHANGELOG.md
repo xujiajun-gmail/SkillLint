@@ -17,6 +17,9 @@ All notable changes to this project will be documented in this file.
 - Verdict semantics so high-risk operational skills are less likely to be overcalled as malicious.
 - Additional suppression/tuning for semantic exfiltration, permission drift, and prompt-priority false positives.
 - Expanded the shipped golden subset to 70+ adjudicated samples with better zh, package, CI, and dataflow coverage.
+- Refactored the optional LLM analyzer to return plain-language semantic labels that are mapped locally to SkillLint rule/taxonomy metadata.
+- Added dedicated LLM runtime settings through `SKILLLINT_LLM_BASE_URL`, `SKILLLINT_LLM_API_KEY`, `SKILLLINT_LLM_MODEL`, config-file fields, and matching `scan` CLI flags.
+- Added LLM finding deduplication plus opt-in `--llm-debug` raw response capture for prompt debugging.
 
 ## [0.1.0] - 2026-04-14
 

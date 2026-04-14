@@ -78,6 +78,8 @@ class SkillScanner:
             semantic_findings = semantic_engine.run(workspace, findings)
             findings.extend(semantic_findings)
             engine_meta["semantic_llm_status"] = semantic_engine.last_llm_status
+            if self.config.llm.debug and semantic_engine.last_llm_debug_records:
+                engine_meta["semantic_llm_debug"] = semantic_engine.last_llm_debug_records
         if self.config.engines.dataflow.enabled:
             findings.extend(DataflowEngine(self.rule_selector).run(workspace))
         return findings, engine_meta

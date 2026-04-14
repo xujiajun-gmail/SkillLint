@@ -32,8 +32,8 @@ rules:
   exclude_taxonomies: []
 llm:
   provider: openai
-  model: gpt-5
   max_context_chars: 12000
   temperature: 0
+  debug: false
 severity:
   fail_on: null

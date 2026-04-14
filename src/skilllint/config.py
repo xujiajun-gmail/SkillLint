@@ -104,9 +104,12 @@ class RulesConfig(BaseModel):
 
 class LLMConfig(BaseModel):
     provider: str = "openai"
-    model: str = "gpt-5"
+    base_url: str | None = None
+    api_key: str | None = None
+    model: str | None = None
     max_context_chars: int = 12000
     temperature: float = 0.0
+    debug: bool = False
 
 
 class SeverityConfig(BaseModel):

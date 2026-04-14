@@ -59,6 +59,26 @@ def scan(
         "--use-llm",
         help="Enable LLM-based semantic analysis when available",
     ),
+    llm_base_url: str | None = typer.Option(
+        None,
+        "--llm-base-url",
+        help="Override SKILLLINT_LLM_BASE_URL for this scan",
+    ),
+    llm_api_key: str | None = typer.Option(
+        None,
+        "--llm-api-key",
+        help="Override SKILLLINT_LLM_API_KEY for this scan",
+    ),
+    llm_model: str | None = typer.Option(
+        None,
+        "--llm-model",
+        help="Override SKILLLINT_LLM_MODEL for this scan",
+    ),
+    llm_debug: bool = typer.Option(
+        False,
+        "--llm-debug",
+        help="Include raw LLM responses in JSON/SARIF metadata for prompt debugging",
+    ),
     use_dataflow: bool = typer.Option(
         False,
         "--use-dataflow",
@@ -75,6 +95,14 @@ def scan(
     cfg.outputs.report_language = lang
     cfg.outputs.format = format
     cfg.engines.semantic.use_llm = use_llm
+    if llm_base_url is not None:
+        cfg.llm.base_url = llm_base_url
+    if llm_api_key is not None:
+        cfg.llm.api_key = llm_api_key
+    if llm_model is not None:
+        cfg.llm.model = llm_model
+    if llm_debug:
+        cfg.llm.debug = True
     if use_dataflow:
         cfg.engines.dataflow.enabled = True
     cfg.rules.include_rule_ids = sorted({*cfg.rules.include_rule_ids, *enable_rule})

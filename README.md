@@ -94,8 +94,36 @@ Optional deeper analysis:
 ```bash
 skilllint scan <target> --profile strict
 skilllint scan <target> --use-dataflow
-skilllint scan <target> --use-llm
+skilllint scan <target> --use-llm --llm-model gpt-5
 ```
+
+LLM runtime settings can be passed by CLI flags, config file, or environment variables:
+
+```bash
+export SKILLLINT_LLM_BASE_URL="https://your-endpoint/v1"
+export SKILLLINT_LLM_API_KEY="your-api-key"
+export SKILLLINT_LLM_MODEL="your-model"
+
+skilllint scan <target> --use-llm
+# or
+skilllint scan <target> --use-llm \
+  --llm-base-url https://your-endpoint/v1 \
+  --llm-api-key your-api-key \
+  --llm-model your-model
+```
+
+Config files may also include:
+
+```yaml
+llm:
+  base_url: https://your-endpoint/v1
+  api_key: your-api-key
+  model: your-model
+  debug: false
+```
+
+For security, prefer environment variables or CLI secrets over committing API keys.
+Use `--llm-debug` only during prompt debugging; it includes raw LLM responses and snippets in scan metadata.
 
 Profile discovery:
 
@@ -141,6 +169,7 @@ SkillLint currently combines four engine families:
 - `package`: package structure, symlink, archive, binary, startup artifact, workflow presence
 - `regex`: high-confidence signatures for prompt injection, exfil, install abuse, persistence, destructive actions
 - `semantic`: keyword-group and heuristic semantic analysis, plus optional LLM-assisted review
+  - the optional LLM path now emits plain-language semantic labels and maps them locally to SkillLint taxonomy metadata
 - `dataflow`: source-to-sink analysis for Python helpers and shell scripts
 
 ## Rule catalog
