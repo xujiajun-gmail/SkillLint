@@ -23,7 +23,9 @@ It is intended to produce:
 - Formal threat taxonomy: `docs/skilllint-threat-taxonomy.md`
 - CLI development plan: `docs/skilllint-cli-development-plan.md`
 - Rule catalog: `docs/skilllint-rule-catalog.md`
+- Detector architecture: `docs/skilllint-detector-architecture.md`
 - Profiles and rule filters: `docs/skilllint-profiles.md`
+- Report format: `docs/skilllint-report-format.md`
 - SARIF output: `docs/skilllint-sarif-output.md`
 - Example baseline snapshot: `docs/skilllint-example-baseline.md`
 - Golden labeled subset and evaluation: `docs/skilllint-golden-evaluation.md`
@@ -47,7 +49,7 @@ It is intended to produce:
 - package engine
 - regex engine
 - semantic engine (local heuristics + optional LLM review)
-- dataflow engine (Python AST + shell heuristics, opt-in or via profile)
+- dataflow engine (Python + shell + JS/TS coverage, opt-in or via profile)
 - structured rule catalog under `src/skilllint/rules/`
 - taxonomy mapping and finding correlation
 - golden labeled subset for regression evaluation
@@ -166,11 +168,11 @@ tests/
 ## Detection engines
 
 SkillLint currently combines four engine families:
-- `package`: package structure, symlink, archive, binary, startup artifact, workflow presence
+- `package`: package structure, symlink, archive, binary, startup artifact, manifest, workflow, Dockerfile risk
 - `regex`: high-confidence signatures for prompt injection, exfil, install abuse, persistence, destructive actions
 - `semantic`: keyword-group and heuristic semantic analysis, plus optional LLM-assisted review
   - the optional LLM path now emits plain-language semantic labels and maps them locally to SkillLint taxonomy metadata
-- `dataflow`: source-to-sink analysis for Python helpers and shell scripts
+- `dataflow`: source-to-sink analysis for Python, shell, and JS/TS helpers
 
 ## Rule catalog
 
@@ -194,6 +196,39 @@ SkillLint currently supports:
 - SARIF 2.1.0
 
 Scan outputs now also include correlation hits and score-breakdown metadata for explainability.
+
+### JSON summary highlights
+
+Current JSON summaries expose:
+
+- `risk_level`
+- `score_risk_level`
+- `verdict`
+- `base_score`
+- `correlation_score`
+- `aggregate_score`
+- `correlation_count`
+- `distinct_files`
+- `distinct_taxonomies`
+
+### Finding fields
+
+Current findings include:
+
+- `rule_id`
+- `engine`
+- `severity`
+- `confidence`
+- `primary_taxonomy`
+- `related_taxonomy`
+- `evidence.file`
+- `evidence.line_start`
+- `evidence.line_end`
+- `evidence.snippet`
+
+For full report structure, see:
+
+- `docs/skilllint-report-format.md`
 
 ## Baselines
 

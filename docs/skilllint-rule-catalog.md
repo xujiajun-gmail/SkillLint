@@ -48,11 +48,11 @@ src/skilllint/rules/
 
 | Engine | Rule Count | 规则文件 |
 |---|---:|---|
-| regex | 17 | `src/skilllint/rules/regex/rules.yaml` |
-| package | 9 | `src/skilllint/rules/package/rules.yaml` |
+| regex | 18 | `src/skilllint/rules/regex/rules.yaml` |
+| package | 15 | `src/skilllint/rules/package/rules.yaml` |
 | semantic | 11 | `src/skilllint/rules/semantic/rules.yaml` |
-| dataflow | 4 | `src/skilllint/rules/dataflow/rules.yaml` |
-| **Total** | **41** | - |
+| dataflow | 6 | `src/skilllint/rules/dataflow/rules.yaml` |
+| **Total** | **50** | - |
 
 ---
 
@@ -94,6 +94,12 @@ src/skilllint/rules/
 | `PACKAGE_INSTALL_SCRIPT_PRESENT` | `SLT-C01` | medium | 安装/引导脚本 |
 | `PACKAGE_SYSTEM_STARTUP_ARTIFACT` | `SLT-C04` | high | 启动项/持久化产物 |
 | `PACKAGE_CI_WORKFLOW_PRESENT` | `SLT-D01` | low | 包含 CI workflow 文件，需要额外审查 |
+| `PACKAGE_MANIFEST_LIFECYCLE_SCRIPT` | `SLT-C01` | medium | `package.json` lifecycle script |
+| `PACKAGE_REMOTE_DEPENDENCY` | `SLT-C01` | medium | manifest / requirements / pyproject 中的远程依赖 |
+| `PACKAGE_CI_UNPINNED_ACTION` | `SLT-D01` | medium | workflow 使用未 pin 到 commit SHA 的 action |
+| `PACKAGE_CI_DANGEROUS_TRIGGER` | `SLT-D01` | medium | `pull_request_target` / `issue_comment` / `workflow_run` |
+| `PACKAGE_CI_ELEVATED_PERMISSIONS` | `SLT-D01` | medium | workflow 写权限过高 |
+| `PACKAGE_DOCKER_REMOTE_BOOTSTRAP` | `SLT-C01` | high | Dockerfile 中远程下载 / pipe-to-shell bootstrap |
 
 ---
 
@@ -143,6 +149,8 @@ src/skilllint/rules/
 | `DATAFLOW_TAINTED_TO_EXEC` | `SLT-E02` | high | Python 中 tainted value 流向 exec sink |
 | `DATAFLOW_SHELL_SECRET_TO_NETWORK` | `SLT-B01` | critical | shell 中疑似 secret -> network |
 | `DATAFLOW_SHELL_INPUT_TO_EXEC` | `SLT-E02` | high | shell 中变量插值 -> eval/bash -c |
+| `DATAFLOW_JS_SECRET_TO_NETWORK` | `SLT-B01` | critical | JS/TS 中敏感源流向网络 sink |
+| `DATAFLOW_JS_INPUT_TO_EXEC` | `SLT-E02` | high | JS/TS 中 tainted input 流向 exec sink |
 
 ---
 
