@@ -2,6 +2,8 @@
 
 SkillLint is a security scanner for agent skills.
 
+SkillLint now ships a working CLI baseline with multi-engine scanning, JSON/Markdown/SARIF output, golden-subset evaluation, and an initial corpus of example skills.
+
 ## Goals
 
 SkillLint is being built as a CLI-first tool that can scan a skill from:
@@ -42,11 +44,18 @@ It is intended to produce:
 ### Implemented in the current baseline
 - Python package scaffold
 - `skilllint scan <target>` CLI entrypoint
+- `skilllint profiles`
+- `skilllint evaluate-golden`
 - built-in scan profiles: `balanced`, `strict`, `marketplace-review`, `ci`
 - rule filtering by `rule_id` and taxonomy
 - target type resolution: directory / zip / URL / git URL
 - workspace normalization
 - package engine
+  - hidden file / archive / binary / symlink / startup artifact checks
+  - `package.json` lifecycle scripts
+  - remote / VCS dependency detection in `package.json`, `requirements*.txt`, `pyproject.toml`
+  - GitHub Actions trigger / permissions / unpinned action checks
+  - Dockerfile remote bootstrap checks
 - regex engine
 - semantic engine (local heuristics + optional LLM review)
 - dataflow engine (Python + shell + JS/TS coverage, opt-in or via profile)
@@ -59,6 +68,16 @@ It is intended to produce:
 - Markdown report with auto Chinese or English selection
 - SARIF 2.1.0 output
 - console summary
+
+### Current detector / rule footprint
+
+- Engines: `package`, `regex`, `semantic`, `dataflow`
+- Structured rules:
+  - regex: 18
+  - package: 15
+  - semantic: 11
+  - dataflow: 6
+  - total: 50
 
 ### Not implemented yet
 - richer LLM semantic workflows (multi-pass triage / consensus / budget policies)
@@ -96,7 +115,7 @@ Optional deeper analysis:
 ```bash
 skilllint scan <target> --profile strict
 skilllint scan <target> --use-dataflow
-skilllint scan <target> --use-llm --llm-model gpt-5
+skilllint scan <target> --use-llm --llm-model gpt-5.4
 ```
 
 LLM runtime settings can be passed by CLI flags, config file, or environment variables:
@@ -174,6 +193,19 @@ SkillLint currently combines four engine families:
   - the optional LLM path now emits plain-language semantic labels and maps them locally to SkillLint taxonomy metadata
 - `dataflow`: source-to-sink analysis for Python, shell, and JS/TS helpers
 
+Current package/dataflow coverage already includes:
+
+- package / manifest:
+  - `SKILL.md` structure checks
+  - lifecycle scripts
+  - remote dependencies
+  - CI workflow risk
+  - Dockerfile bootstrap risk
+- dataflow:
+  - Python secret → network / input → exec
+  - shell secret → network / input → exec
+  - JS/TS secret → network / input → exec
+
 ## Rule catalog
 
 Structured rules now live in:
@@ -246,6 +278,9 @@ python3 scripts/evaluate_golden_subset.py
 
 The current shipped golden subset is a larger strict-profile adjudicated set with stronger
 coverage for zh-community skills, packaging risks, CI risks, and dataflow cases.
+
+Current evaluation artifacts in-repo reflect a strict-profile golden subset baseline with
+precision/recall-style rule and taxonomy metrics.
 
 ## License
 

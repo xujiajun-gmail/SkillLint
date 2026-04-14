@@ -4,12 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-14
+
 ### Added
 - Golden labeled subset under `golden/skilllint-golden-subset.yaml`.
 - Synthetic evaluation fixtures under `golden/fixtures/`.
 - Golden evaluation module and `scripts/evaluate_golden_subset.py`.
 - `skilllint evaluate-golden` CLI command.
 - Documentation for golden evaluation and correlation scoring.
+- Detector architecture and report format documentation.
+- Dedicated Markdown renderer tests.
 
 ### Improved
 - Aggregate correlation scoring in scan summaries.
@@ -20,6 +24,10 @@ All notable changes to this project will be documented in this file.
 - Refactored the optional LLM analyzer to return plain-language semantic labels that are mapped locally to SkillLint rule/taxonomy metadata.
 - Added dedicated LLM runtime settings through `SKILLLINT_LLM_BASE_URL`, `SKILLLINT_LLM_API_KEY`, `SKILLLINT_LLM_MODEL`, config-file fields, and matching `scan` CLI flags.
 - Added LLM finding deduplication plus opt-in `--llm-debug` raw response capture for prompt debugging.
+- Expanded package analysis to cover lifecycle scripts, remote dependencies, GitHub Actions risks, and Dockerfile bootstrap patterns.
+- Expanded dataflow analysis to cover more Python sources/sinks plus JS/TS secret→network and input→exec flows.
+- Improved Markdown reports with overview tables, top findings, structured finding detail tables, and stronger zh/en readability.
+- Refreshed README, rule catalog, and development plan to match the current baseline implementation status.
 
 ## [0.1.0] - 2026-04-14
 

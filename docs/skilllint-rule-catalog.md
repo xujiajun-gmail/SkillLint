@@ -189,3 +189,36 @@ src/skilllint/rules/
 4. **Golden dataset**：对 `examples/` 和 `examples/zh-community/` 建立基线结果；
 5. **SARIF mapping**：把 `rule_id` / `taxonomy` / `location` 正式映射到 SARIF；
 6. **Semantic multi-pass**：本地 heuristic -> LLM triage -> correlation 的多阶段裁决。
+
+---
+
+## 10. 与当前开发状态的对应关系
+
+结合 `README.md` 和 `docs/skilllint-cli-development-plan.md` 的当前状态刷新，可把本规则目录理解为：
+
+### 已稳定进入当前 baseline 的部分
+
+- 结构化 rule catalog
+- 四类 detector 对应的稳定 `rule_id`
+- 规则级 severity / confidence / taxonomy 元数据
+- 报告、JSON、SARIF 中对 `rule_id` 的统一复用
+- profile / rule filter / golden evaluation 对规则目录的直接依赖
+
+### 已超出原始 v0.1 计划的部分
+
+- package rules 已覆盖：
+  - manifest lifecycle scripts
+  - remote dependencies
+  - GitHub Actions trigger / permission / unpinned action 风险
+  - Dockerfile remote bootstrap 风险
+- dataflow rules 已覆盖：
+  - Python
+  - shell
+  - JS/TS
+
+### 仍待后续继续增强的部分
+
+- external custom rule pack 机制
+- detector-level regression dashboard
+- 更丰富的 SARIF taxonomy component / rule help linkage
+- richer LLM semantic multi-pass / consensus workflow
