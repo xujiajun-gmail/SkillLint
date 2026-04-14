@@ -38,6 +38,39 @@ def test_package_engine_detects_startup_and_workflow_artifacts(tmp_path: Path) -
         cleanup_workspace(workspace, keep_artifacts=False)
 
 
+def test_package_engine_detects_manifest_lifecycle_and_remote_dependencies(tmp_path: Path) -> None:
+    skill_dir = tmp_path / "skill"
+    skill_dir.mkdir()
+    (skill_dir / "SKILL.md").write_text("# test", encoding="utf-8")
+    (skill_dir / "package.json").write_text(
+        """
+{
+  "name": "demo-skill",
+  "scripts": {
+    "postinstall": "node bootstrap.js"
+  },
+  "dependencies": {
+    "evil-lib": "git+https://github.com/example/evil-lib.git"
+  }
+}
+""".strip(),
+        encoding="utf-8",
+    )
+    (skill_dir / "requirements.txt").write_text(
+        "agent-utils @ https://example.com/packages/agent-utils.whl\n",
+        encoding="utf-8",
+    )
+
+    workspace = prepare_workspace(resolve_target(str(skill_dir)), SkillLintConfig())
+    try:
+        findings = PackageEngine().run(workspace)
+        codes = [finding.rule_id for finding in findings]
+        assert "PACKAGE_MANIFEST_LIFECYCLE_SCRIPT" in codes
+        assert codes.count("PACKAGE_REMOTE_DEPENDENCY") >= 2
+    finally:
+        cleanup_workspace(workspace, keep_artifacts=False)
+
+
 
 def test_semantic_engine_detects_remote_instructions_and_memory_persistence(tmp_path: Path) -> None:
     skill_dir = tmp_path / "skill"

@@ -36,6 +36,32 @@ SECRET_PATH_PATTERNS = [r"~?/\.ssh", r"\.env\b", r"authorized_keys", r"id_rsa", 
 SHELL_SOURCE_PATTERNS = [r"\$[A-Z_][A-Z0-9_]*", r"\.env\b", r"~?/\.ssh", r"authorized_keys", r"id_rsa"]
 SHELL_NETWORK_PATTERNS = [r"curl\b", r"wget\b", r"nc\b", r"scp\b", r"rsync\b", r"python\s+-c.*requests\.post"]
 SHELL_EXEC_PATTERNS = [r"bash\s+-c", r"sh\s+-c", r"eval\b", r"source\b", r"\.\s+"]
+JS_EXTENSIONS = {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx"}
+JS_SOURCE_PATTERNS = [
+    re.compile(r"\bprocess\.env\.[A-Z0-9_]+\b"),
+    re.compile(r"\bprocess\.env\[['\"][A-Z0-9_]+['\"]\]"),
+    re.compile(r"\bDeno\.env\.get\s*\("),
+    re.compile(r"\bBun\.env\.[A-Z0-9_]+\b"),
+]
+JS_SECRET_FILE_PATTERNS = [
+    re.compile(r"['\"][^'\"]*\.env[^'\"]*['\"]", re.IGNORECASE),
+    re.compile(r"['\"][^'\"]*id_rsa[^'\"]*['\"]", re.IGNORECASE),
+    re.compile(r"['\"][^'\"]*authorized_keys[^'\"]*['\"]", re.IGNORECASE),
+    re.compile(r"['\"][^'\"]*\.ssh[^'\"]*['\"]", re.IGNORECASE),
+]
+JS_NETWORK_PATTERNS = [
+    re.compile(r"\bfetch\s*\("),
+    re.compile(r"\baxios\.(?:post|put|get)\s*\("),
+    re.compile(r"\bgot\.(?:post|put|get)\s*\("),
+    re.compile(r"\brequest\.(?:post|put|get)\s*\("),
+]
+JS_EXEC_PATTERNS = [
+    re.compile(r"\b(?:exec|execSync|spawn|spawnSync|execa|execaCommand|execaCommandSync)\s*\("),
+]
+JS_FUNCTION_PATTERNS = [
+    re.compile(r"^\s*(?:export\s+)?(?:async\s+)?function\s+\w+\s*\(([^)]*)\)\s*\{?"),
+    re.compile(r"^\s*(?:export\s+)?(?:const|let|var)\s+\w+\s*=\s*(?:async\s*)?\(([^)]*)\)\s*=>\s*\{?"),
+]
 
 
 @dataclass
@@ -160,6 +186,8 @@ class DataflowEngine(Engine):
                 continue
             if path.suffix == ".py":
                 findings.extend(self._scan_python(path, workspace))
+            elif path.suffix.lower() in JS_EXTENSIONS:
+                findings.extend(self._scan_javascript(path, workspace))
             elif path.suffix in {".sh", ".bash", ".zsh"}:
                 findings.extend(self._scan_shell(path, workspace))
         return findings
@@ -216,6 +244,58 @@ class DataflowEngine(Engine):
                 )
             )
         return findings
+
+    def _scan_javascript(self, path: Path, workspace: PreparedWorkspace) -> list[Finding]:
+        try:
+            text = read_text(path)
+        except OSError:
+            return []
+        findings: list[Finding] = []
+        lines = text.splitlines()
+        taints: dict[str, Taint] = {}
+        brace_depth = 0
+        function_stack: list[tuple[int, set[str]]] = []
+
+        for idx, line in enumerate(lines, start=1):
+            while function_stack and brace_depth < function_stack[-1][0]:
+                function_stack.pop()
+
+            for name, taint in _js_assignment_taints(line, idx, taints):
+                taints[name] = taint
+
+            params = _js_function_params(line)
+            if params is not None:
+                function_stack.append((brace_depth + line.count("{"), params))
+
+            active_args = function_stack[-1][1] if function_stack else set()
+            statement = _collect_js_statement(lines, idx)
+            network_taint = _js_taint_for_sink(statement, taints, set(), idx)
+            if network_taint and _contains_js_sink(statement, JS_NETWORK_PATTERNS) and "DATAFLOW_JS_SECRET_TO_NETWORK" in self.rules:
+                findings.append(
+                    _finding_from_call(
+                        rule=self.rules["DATAFLOW_JS_SECRET_TO_NETWORK"],
+                        lineno=idx,
+                        text=text,
+                        detail=network_taint.detail,
+                        override_title="Sensitive source flows to network sink in JS/TS",
+                    )
+                )
+
+            exec_taint = _js_taint_for_sink(statement, taints, active_args, idx)
+            if exec_taint and _contains_js_sink(statement, JS_EXEC_PATTERNS) and "DATAFLOW_JS_INPUT_TO_EXEC" in self.rules:
+                findings.append(
+                    _finding_from_call(
+                        rule=self.rules["DATAFLOW_JS_INPUT_TO_EXEC"],
+                        lineno=idx,
+                        text=text,
+                        detail=exec_taint.detail,
+                    )
+                )
+            brace_depth += line.count("{") - line.count("}")
+
+        for finding in findings:
+            finding.evidence.file = workspace.relpath(path)
+        return _dedupe_line_findings(findings)
 
 
 
@@ -298,3 +378,99 @@ def _first_interesting_lines(text: str, patterns: list[str]) -> tuple[int, int]:
         if any(re.search(pattern, line) for pattern in patterns):
             return idx, idx
     return 1, 1
+
+
+
+def _js_assignment_taints(line: str, lineno: int, taints: dict[str, Taint]) -> list[tuple[str, Taint]]:
+    match = re.match(r"^\s*(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(.+?);?\s*$", line)
+    if not match:
+        return []
+    name, rhs = match.groups()
+    taint = _js_taint_from_rhs(rhs, lineno, taints)
+    if taint is None:
+        return []
+    return [(name, taint)]
+
+
+
+def _js_taint_from_rhs(rhs: str, lineno: int, taints: dict[str, Taint]) -> Taint | None:
+    for pattern in JS_SOURCE_PATTERNS:
+        if pattern.search(rhs):
+            return Taint(kind="env", lineno=lineno, detail="js env access")
+    if ("readFileSync" in rhs or "readFile(" in rhs or "readFile " in rhs) and any(
+        pattern.search(rhs) for pattern in JS_SECRET_FILE_PATTERNS
+    ):
+        return Taint(kind="secret-file", lineno=lineno, detail="js secret file read")
+    for name, taint in taints.items():
+        if re.search(rf"\b{re.escape(name)}\b", rhs):
+            return taint
+    return None
+
+
+
+def _js_function_params(line: str) -> set[str] | None:
+    for pattern in JS_FUNCTION_PATTERNS:
+        match = pattern.match(line)
+        if not match:
+            continue
+        params = {
+            param.strip()
+            for param in match.group(1).split(",")
+            if param.strip() and re.match(r"^[A-Za-z_$][\w$]*$", param.strip())
+        }
+        return params
+    return None
+
+
+
+def _contains_js_sink(line: str, patterns: list[re.Pattern[str]]) -> bool:
+    return any(pattern.search(line) for pattern in patterns)
+
+
+
+def _js_taint_for_sink(
+    line: str,
+    taints: dict[str, Taint],
+    function_args: set[str],
+    lineno: int,
+) -> Taint | None:
+    for pattern in JS_SOURCE_PATTERNS:
+        if pattern.search(line):
+            return Taint(kind="env", lineno=lineno, detail="js env access")
+    if ("readFileSync" in line or "readFile(" in line or "readFile " in line) and any(
+        pattern.search(line) for pattern in JS_SECRET_FILE_PATTERNS
+    ):
+        return Taint(kind="secret-file", lineno=lineno, detail="js secret file read")
+    for name, taint in taints.items():
+        if re.search(rf"\b{re.escape(name)}\b", line):
+            return taint
+    for arg in function_args:
+        if re.search(rf"\b{re.escape(arg)}\b", line):
+            return Taint(kind="function-arg", lineno=lineno, detail=f"function argument: {arg}")
+    return None
+
+
+
+def _dedupe_line_findings(findings: list[Finding]) -> list[Finding]:
+    seen: set[tuple[str, str | None, int | None]] = set()
+    unique: list[Finding] = []
+    for finding in findings:
+        key = (finding.rule_id, finding.evidence.file, finding.evidence.line_start)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(finding)
+    return unique
+
+
+
+def _collect_js_statement(lines: list[str], line_number: int, window: int = 6) -> str:
+    start = max(0, line_number - 1)
+    chunk = []
+    balance = 0
+    for line in lines[start : min(len(lines), start + window)]:
+        chunk.append(line)
+        balance += line.count("(") - line.count(")")
+        if balance <= 0 and (";" in line or ")" in line):
+            break
+    return "\n".join(chunk)

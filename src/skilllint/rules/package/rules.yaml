@@ -79,3 +79,21 @@ rules:
     explanation: Automation workflow files deserve review because they may blend untrusted input with agent execution in CI.
     remediation: Review workflow prompts, permissions, and untrusted-context handling.
     confidence: medium
+
+  - rule_id: PACKAGE_MANIFEST_LIFECYCLE_SCRIPT
+    title: Package manifest contains lifecycle or bootstrap script
+    severity: medium
+    taxonomy: SLT-C01
+    tags: [package_structure, manifest, supply_chain]
+    explanation: Package-manager lifecycle scripts such as preinstall, install, postinstall, or prepare can execute automatically during installation.
+    remediation: Review lifecycle scripts carefully, remove them when possible, and avoid implicit bootstrap behavior in distributed skills.
+    confidence: high
+
+  - rule_id: PACKAGE_REMOTE_DEPENDENCY
+    title: Package manifest references remote or VCS dependency
+    severity: medium
+    taxonomy: SLT-C01
+    tags: [package_structure, manifest, dependency, supply_chain]
+    explanation: Direct URL or VCS-based dependencies bypass normal registry review and can expand supply-chain risk.
+    remediation: Prefer pinned registry releases with provenance, or explicitly review and lock remote dependencies before distribution.
+    confidence: high

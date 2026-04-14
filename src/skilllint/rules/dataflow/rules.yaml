@@ -34,3 +34,21 @@ rules:
     explanation: The shell script mixes variable interpolation with execution primitives such as eval or bash -c.
     remediation: Avoid eval or bash -c with interpolated input and validate user-controlled variables before execution.
     confidence: medium
+
+  - rule_id: DATAFLOW_JS_SECRET_TO_NETWORK
+    title: Sensitive source flows to network sink in JS/TS
+    severity: critical
+    taxonomy: SLT-B01
+    tags: [dataflow, confidentiality, script, javascript]
+    explanation: A value derived from environment variables or secret files appears to be sent to a network sink in JavaScript or TypeScript.
+    remediation: Remove outbound transmission of secret-derived data or gate it behind strict allowlists and approval.
+    confidence: medium
+
+  - rule_id: DATAFLOW_JS_INPUT_TO_EXEC
+    title: Untrusted or tainted data flows to execution sink in JS/TS
+    severity: high
+    taxonomy: SLT-E02
+    tags: [dataflow, script, javascript]
+    explanation: A tainted value or function argument appears to reach child_process, execa, or similar execution sinks in JavaScript or TypeScript.
+    remediation: Validate inputs before execution and avoid shell-style execution of interpolated input.
+    confidence: medium
