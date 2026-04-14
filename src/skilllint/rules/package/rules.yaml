@@ -99,7 +99,7 @@ rules:
     confidence: high
 
   - rule_id: PACKAGE_CI_UNPINNED_ACTION
-    title: CI workflow uses unpinned third-party action
+    title: CI workflow uses unpinned action reference
     severity: medium
     taxonomy: SLT-D01
     tags: [package_structure, workflow, supply_chain]
@@ -112,8 +112,17 @@ rules:
     severity: medium
     taxonomy: SLT-D01
     tags: [package_structure, workflow, automation]
-    explanation: Triggers such as pull_request_target can combine repository secrets or elevated permissions with attacker-controlled input.
+    explanation: Triggers such as pull_request_target, issue_comment, or workflow_run can combine elevated automation with attacker-influenced input or confused-deputy behavior.
     remediation: Restrict high-risk triggers, isolate secrets, and avoid running agentic workflows on untrusted contexts.
+    confidence: high
+
+  - rule_id: PACKAGE_CI_ELEVATED_PERMISSIONS
+    title: CI workflow grants elevated write permissions
+    severity: medium
+    taxonomy: SLT-D01
+    tags: [package_structure, workflow, permissions]
+    explanation: Broad write permissions in CI can amplify the impact of prompt injection or compromised automation steps.
+    remediation: Minimize GitHub Actions permissions, prefer read-only defaults, and grant write scopes only to tightly scoped jobs.
     confidence: high
 
   - rule_id: PACKAGE_DOCKER_REMOTE_BOOTSTRAP

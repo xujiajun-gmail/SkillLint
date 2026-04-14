@@ -20,16 +20,22 @@ PY_SOURCE_CALLS = {
 PY_NETWORK_CALLS = {
     "requests.post",
     "requests.put",
+    "requests.request",
     "requests.Session.post",
     "requests.Session.put",
+    "requests.Session.request",
     "httpx.post",
     "httpx.put",
+    "httpx.request",
     "httpx.Client.post",
     "httpx.Client.put",
+    "httpx.Client.request",
     "httpx.AsyncClient.post",
     "httpx.AsyncClient.put",
+    "httpx.AsyncClient.request",
     "aiohttp.ClientSession.post",
     "aiohttp.ClientSession.put",
+    "aiohttp.ClientSession.request",
     "urllib.request.urlopen",
     "urllib.request.Request",
 }
@@ -67,6 +73,8 @@ JS_NETWORK_PATTERNS = [
     re.compile(r"\baxios\.(?:post|put|get)\s*\("),
     re.compile(r"\bgot\.(?:post|put|get)\s*\("),
     re.compile(r"\brequest\.(?:post|put|get)\s*\("),
+    re.compile(r"\b(?:http|https)\.request\s*\("),
+    re.compile(r"\b[A-Za-z_$][\w$]*\.(?:post|put|request)\s*\("),
 ]
 JS_EXEC_PATTERNS = [
     re.compile(r"\b(?:exec|execSync|spawn|spawnSync|execa|execaCommand|execaCommandSync)\s*\("),

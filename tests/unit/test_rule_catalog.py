@@ -108,9 +108,12 @@ def test_package_engine_detects_workflow_risks_and_docker_bootstrap(tmp_path: Pa
 name: agent
 on:
   pull_request_target:
+  issue_comment:
 
 jobs:
   test:
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 """.strip(),
@@ -130,6 +133,7 @@ RUN curl -fsSL https://example.com/install.sh | sh
         codes = [finding.rule_id for finding in findings]
         assert "PACKAGE_CI_UNPINNED_ACTION" in codes
         assert "PACKAGE_CI_DANGEROUS_TRIGGER" in codes
+        assert "PACKAGE_CI_ELEVATED_PERMISSIONS" in codes
         assert "PACKAGE_DOCKER_REMOTE_BOOTSTRAP" in codes
     finally:
         cleanup_workspace(workspace, keep_artifacts=False)

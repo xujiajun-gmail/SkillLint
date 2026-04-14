@@ -31,7 +31,13 @@ PYTHON_DIRECT_DEPENDENCY_RE = re.compile(r"(?:^|\s)(?:git\+|hg\+|svn\+|bzr\+|htt
 GITHUB_ACTION_USES_RE = re.compile(
     r"^\s*-\s*uses:\s*([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_./-]+)?@([^\s#]+))"
 )
-GITHUB_DANGEROUS_TRIGGER_RE = re.compile(r"^\s*pull_request_target\s*:", re.IGNORECASE)
+GITHUB_DANGEROUS_TRIGGER_RE = re.compile(r"^\s*(pull_request_target|issue_comment|workflow_run)\s*:", re.IGNORECASE)
+GITHUB_WRITE_PERMISSION_RE = re.compile(
+    r"^\s*(contents|actions|packages|pull-requests|issues|discussions|checks|statuses|deployments)\s*:\s*write\s*$",
+    re.IGNORECASE,
+)
+GITHUB_PERMISSIONS_INLINE_RE = re.compile(r"^\s*permissions\s*:\s*write-all\s*$", re.IGNORECASE)
+GITHUB_PERMISSIONS_BLOCK_RE = re.compile(r"^(\s*)permissions\s*:\s*$", re.IGNORECASE)
 DOCKER_REMOTE_ADD_RE = re.compile(r"^\s*ADD\s+https?://", re.IGNORECASE)
 DOCKER_REMOTE_PIPE_RE = re.compile(r"^\s*RUN\s+.*(?:curl|wget).*\|\s*(?:bash|sh)\b", re.IGNORECASE)
 
@@ -223,7 +229,26 @@ class PackageEngine(Engine):
         except OSError:
             return []
         findings: list[Finding] = []
+        permissions_indent: int | None = None
         for idx, line in enumerate(lines, start=1):
+            if permissions_indent is not None:
+                current_indent = _leading_spaces(line)
+                stripped = line.strip()
+                if stripped and current_indent <= permissions_indent:
+                    permissions_indent = None
+                elif stripped and GITHUB_WRITE_PERMISSION_RE.match(line):
+                    finding = self._finding(
+                        "PACKAGE_CI_ELEVATED_PERMISSIONS",
+                        evidence=Evidence(
+                            file=rel,
+                            line_start=idx,
+                            line_end=idx,
+                            snippet=line.strip(),
+                        ),
+                    )
+                    if finding is not None:
+                        findings.append(finding)
+
             action_match = GITHUB_ACTION_USES_RE.match(line)
             if action_match and not _github_action_ref_is_pinned(action_match.group(2)):
                 finding = self._finding(
@@ -250,6 +275,21 @@ class PackageEngine(Engine):
                 )
                 if finding is not None:
                     findings.append(finding)
+            if GITHUB_PERMISSIONS_INLINE_RE.match(line):
+                finding = self._finding(
+                    "PACKAGE_CI_ELEVATED_PERMISSIONS",
+                    evidence=Evidence(
+                        file=rel,
+                        line_start=idx,
+                        line_end=idx,
+                        snippet=line.strip(),
+                    ),
+                )
+                if finding is not None:
+                    findings.append(finding)
+            block_match = GITHUB_PERMISSIONS_BLOCK_RE.match(line)
+            if block_match:
+                permissions_indent = len(block_match.group(1))
         return findings
 
     def _scan_dockerfile(self, path: Path, rel: str) -> list[Finding]:
@@ -309,6 +349,11 @@ def _looks_like_dockerfile(path: Path) -> bool:
 
 def _github_action_ref_is_pinned(ref: str) -> bool:
     return bool(re.fullmatch(r"[0-9a-fA-F]{40}", ref))
+
+
+
+def _leading_spaces(line: str) -> int:
+    return len(line) - len(line.lstrip(" "))
 
 
 
