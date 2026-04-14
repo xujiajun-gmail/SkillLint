@@ -1,0 +1,39 @@
+version: 1
+profile: balanced
+language: auto
+workspace:
+  root: .skilllint-work
+  keep_artifacts: false
+inputs:
+  allow_remote: true
+  download_timeout_seconds: 60
+  max_archive_size_mb: 100
+outputs:
+  format: both
+  json_file: result.json
+  markdown_file: report.md
+  sarif_file: result.sarif.json
+  include_snippets: true
+  report_language: auto
+engines:
+  regex:
+    enabled: true
+  package:
+    enabled: true
+  semantic:
+    enabled: true
+    use_llm: false
+  dataflow:
+    enabled: false
+rules:
+  include_rule_ids: []
+  exclude_rule_ids: []
+  include_taxonomies: []
+  exclude_taxonomies: []
+llm:
+  provider: openai
+  model: gpt-5
+  max_context_chars: 12000
+  temperature: 0
+severity:
+  fail_on: null

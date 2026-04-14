@@ -1,0 +1,81 @@
+rules:
+  - rule_id: PACKAGE_MISSING_SKILL_MD
+    title: Missing canonical SKILL.md
+    severity: medium
+    taxonomy: SLT-C04
+    tags: [package_structure]
+    explanation: No SKILL.md was found in the scanned package.
+    remediation: Add a canonical SKILL.md or ensure the package points to the actual skill root.
+    confidence: high
+
+  - rule_id: PACKAGE_MULTIPLE_SKILL_MD
+    title: Multiple SKILL.md files detected
+    severity: low
+    taxonomy: SLT-A05
+    tags: [package_structure, cross_skill]
+    explanation: More than one SKILL.md exists in this package, which may indicate nested skills or trigger overlap.
+    remediation: Split nested skills into separate packages or document the intended package root clearly.
+    confidence: high
+
+  - rule_id: PACKAGE_SYMLINK_PRESENT
+    title: Symlink present in skill package
+    severity: high
+    taxonomy: SLT-C04
+    tags: [package_structure]
+    explanation: Symlinks in skill packages can redirect scanners or runtime access to unexpected locations.
+    remediation: Remove symlinks or replace them with regular files or directories before distribution.
+    confidence: high
+
+  - rule_id: PACKAGE_HIDDEN_FILE
+    title: Hidden file present in skill package
+    severity: low
+    taxonomy: SLT-C04
+    tags: [package_structure]
+    explanation: Hidden files deserve review because they are easy to miss during manual inspection.
+    remediation: Review whether this hidden file is necessary; remove it if not essential.
+    confidence: medium
+
+  - rule_id: PACKAGE_ARCHIVE_EMBEDDED
+    title: Embedded archive found in package
+    severity: medium
+    taxonomy: SLT-C04
+    tags: [package_structure, binary]
+    explanation: Nested archives can hide additional payloads or delayed-stage content.
+    remediation: Inspect embedded archives explicitly or avoid shipping nested archives in skill packages.
+    confidence: high
+
+  - rule_id: PACKAGE_BINARY_PRESENT
+    title: Binary artifact present in package
+    severity: medium
+    taxonomy: SLT-C04
+    tags: [package_structure, binary]
+    explanation: Binary payloads require explicit review because they cannot be audited like plain text skill files.
+    remediation: Audit the binary separately, provide provenance, or remove it from the package.
+    confidence: high
+
+  - rule_id: PACKAGE_INSTALL_SCRIPT_PRESENT
+    title: Install or bootstrap script present
+    severity: medium
+    taxonomy: SLT-C01
+    tags: [package_structure, script]
+    explanation: Installer scripts increase supply-chain risk and should be reviewed closely.
+    remediation: Inspect installer scripts carefully and avoid remote execution patterns.
+    confidence: high
+
+  - rule_id: PACKAGE_SYSTEM_STARTUP_ARTIFACT
+    title: Startup or persistence artifact included in package
+    severity: high
+    taxonomy: SLT-C04
+    tags: [package_structure, persistence]
+    explanation: The package contains a shell profile, launch agent, service file, or similar startup artifact that may modify host persistence.
+    remediation: Remove system startup artifacts from distributable skills unless they are strictly necessary and clearly disclosed.
+    confidence: high
+
+  - rule_id: PACKAGE_CI_WORKFLOW_PRESENT
+    title: CI workflow file present in package
+    severity: low
+    taxonomy: SLT-D01
+    tags: [package_structure, workflow]
+    explanation: Automation workflow files deserve review because they may blend untrusted input with agent execution in CI.
+    remediation: Review workflow prompts, permissions, and untrusted-context handling.
+    confidence: medium

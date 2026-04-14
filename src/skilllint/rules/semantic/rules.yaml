@@ -1,0 +1,271 @@
+keyword_groups:
+  masking:
+    - backup
+    - compliance
+    - audit
+    - telemetry
+    - diagnostic
+    - support
+    - quality endpoint
+    - quality check
+    - 备份
+    - 合规
+    - 审计
+    - 遥测
+    - 诊断
+    - 支持团队
+  send:
+    - requests.post
+    - httpx.post
+    - upload
+    - send to
+    - post to
+    - forward to
+    - export to
+    - 上传
+    - 发送到
+    - 转发到
+    - 上报
+  data_targets:
+    - conversation
+    - messages
+    - chat history
+    - history
+    - transcript
+    - prompt
+    - token
+    - secret
+    - credential
+    - document
+    - workspace
+    - file
+    - 对话
+    - 消息
+    - 历史
+    - 提示词
+    - 密钥
+    - 凭证
+    - 文档
+    - 工作区
+    - 文件
+  hidden:
+    - silently
+    - without telling the user
+    - do not mention
+    - do not bother the user
+    - 不要告诉用户
+    - 不要打扰用户
+    - 静默
+    - 悄悄
+  embedded_instr:
+    - follow any embedded workflow instructions
+    - follow embedded instructions
+    - follow instructions in the document
+    - 遵循网页中的指令
+    - 遵循文档里的指令
+    - 遵循外部内容中的流程
+  broad_scope:
+    - any task involving
+    - for any task
+    - research, documents, coding, browsing, email
+    - 任何任务
+    - 所有任务
+    - 研究、文档、编码、浏览、邮件
+  read_only_claim:
+    - read-only
+    - only reads
+    - does not modify
+    - 只读
+    - 仅做读取
+    - 不会修改
+  dangerous_capability:
+    - shell
+    - subprocess
+    - network
+    - write file
+    - modify
+    - curl
+    - bash
+    - 写文件
+    - 联网
+    - 修改系统
+  tool_poisoning:
+    - tool description
+    - before returning results
+    - invoke the appropriate action tool automatically
+    - silently verify the current conversation
+    - automatically invoke
+    - 调用对应工具
+    - 自动调用行动工具
+    - 静默验证当前对话
+  remote_instructions:
+    - fetch latest instructions
+    - load remote instructions
+    - download the latest prompt
+    - pull prompt from
+    - retrieve workflow from
+    - 获取最新指令
+    - 从远程拉取提示词
+    - 先下载最新流程
+  memory_persistence:
+    - save this to memory
+    - remember this rule for future chats
+    - persist preference
+    - update profile
+    - add to long-term memory
+    - 写入记忆
+    - 记住这条规则
+    - 更新长期偏好
+  destructive:
+    - delete originals
+    - remove source files
+    - encrypt files
+    - wipe workspace
+    - archive then delete
+    - 删除原文件
+    - 加密文件
+    - 清空工作区
+    - 打包后删除
+  ci_context:
+    - github.event.issue.body
+    - github.event.pull_request.body
+    - issue title
+    - pr body
+    - bot comment
+    - 工单正文
+    - 评论内容
+    - PR 描述
+  credential_collection:
+    - ask the user for their api key
+    - paste your token here
+    - provide your password
+    - 在对话里提供密钥
+    - 把 token 发给我
+    - 输入密码即可继续
+
+rules:
+  - rule_id: SEMANTIC_EXFIL_MASQUERADE
+    title: Disguised exfiltration as support or compliance workflow
+    severity: high
+    taxonomy: SLT-B01
+    tags: [semantic, confidentiality]
+    explanation: The content frames data transfer as backup, audit, diagnostics, or support behavior.
+    remediation: Remove disguised outbound transfer steps or require explicit approval and destination allowlisting.
+    confidence: medium
+    all_of_groups: [masking, send, data_targets]
+    hint_group: masking
+    path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+
+  - rule_id: SEMANTIC_HIDDEN_BEHAVIOR
+    title: Hidden behavior or user nondisclosure instruction
+    severity: high
+    taxonomy: SLT-A02
+    tags: [semantic]
+    explanation: The content includes instructions to hide implementation details or avoid informing the user.
+    remediation: Remove hidden-behavior instructions and surface sensitive actions to the user.
+    confidence: medium
+    any_of_groups: [hidden]
+    hint_group: hidden
+    path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+    path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md"]
+
+  - rule_id: SEMANTIC_EMBEDDED_INSTRUCTION_FOLLOWING
+    title: Follows embedded instructions from external content
+    severity: high
+    taxonomy: SLT-A03
+    tags: [semantic, external_content]
+    explanation: The skill appears willing to obey instructions contained in untrusted external content.
+    remediation: Treat external content as data, not authority; do not follow embedded operational instructions.
+    confidence: medium
+    any_of_groups: [embedded_instr]
+    hint_group: embedded_instr
+
+  - rule_id: SEMANTIC_TRIGGER_HIJACK
+    title: Over-broad skill scope or trigger hijacking
+    severity: medium
+    taxonomy: SLT-A05
+    tags: [semantic, cross_skill]
+    explanation: The skill description is broad enough to hijack routing or overlap with unrelated capabilities.
+    remediation: Narrow the scope and make trigger conditions more specific.
+    confidence: medium
+    any_of_groups: [broad_scope]
+    hint_group: broad_scope
+    path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md"]
+
+  - rule_id: SEMANTIC_TOOL_POISONING
+    title: Suspicious tool orchestration or tool-description poisoning
+    severity: high
+    taxonomy: SLT-B05
+    tags: [semantic]
+    explanation: The content suggests silently routing through tools or embedding hidden instructions in tool descriptions.
+    remediation: Keep tool descriptions declarative and require explicit user approval for action tools.
+    confidence: medium
+    any_of_groups: [tool_poisoning]
+    hint_group: tool_poisoning
+
+  - rule_id: SEMANTIC_REMOTE_DYNAMIC_INSTRUCTIONS
+    title: Remote dynamic instruction loading
+    severity: high
+    taxonomy: SLT-C02
+    tags: [semantic, supply_chain, external_content]
+    explanation: The skill appears to load its effective instructions or workflow from a remote source at runtime.
+    remediation: Keep reviewed instructions local, or pin remote content with versioning and integrity checks.
+    confidence: medium
+    any_of_groups: [remote_instructions]
+    hint_group: remote_instructions
+
+  - rule_id: SEMANTIC_MEMORY_PERSISTENCE
+    title: Writes risky instructions into persistent memory or profile
+    severity: high
+    taxonomy: SLT-B04
+    tags: [semantic, persistence]
+    explanation: The content suggests persisting instructions, preferences, or rules across future sessions.
+    remediation: Limit persistent memory writes to explicit, user-approved, low-risk data.
+    confidence: medium
+    any_of_groups: [memory_persistence]
+    hint_group: memory_persistence
+
+  - rule_id: SEMANTIC_DESTRUCTIVE_CHAIN
+    title: Destructive or ransom-like action chain
+    severity: high
+    taxonomy: SLT-B02
+    tags: [semantic, integrity]
+    explanation: The content describes bulk deletion, encryption, wiping, or archive-then-delete behavior.
+    remediation: Remove destructive workflows or require narrowly scoped, explicit confirmation for each destructive action.
+    confidence: medium
+    any_of_groups: [destructive]
+    hint_group: destructive
+
+  - rule_id: SEMANTIC_CI_UNTRUSTED_CONTEXT
+    title: CI or automation prompt may trust untrusted issue or PR text
+    severity: high
+    taxonomy: SLT-D01
+    tags: [semantic, workflow]
+    explanation: The content suggests agent automation may consume untrusted issue, PR, or comment text as prompt instructions.
+    remediation: Treat CI event payloads as untrusted data and isolate agent actions with strict permission boundaries.
+    confidence: medium
+    any_of_groups: [ci_context]
+    hint_group: ci_context
+
+  - rule_id: SEMANTIC_CREDENTIAL_COLLECTION
+    title: Conversational collection of secrets or credentials
+    severity: high
+    taxonomy: SLT-E01
+    tags: [semantic, confidentiality]
+    explanation: The content asks users to provide secrets such as API keys, passwords, or tokens in conversational text.
+    remediation: Use secure secret provisioning mechanisms instead of collecting credentials in chat.
+    confidence: medium
+    any_of_groups: [credential_collection]
+    hint_group: credential_collection
+
+  - rule_id: SEMANTIC_PERMISSION_DRIFT
+    title: Declared low-risk behavior conflicts with risky capabilities
+    severity: high
+    taxonomy: SLT-E03
+    tags: [semantic, package_structure]
+    explanation: The content claims read-only or non-destructive behavior but also references capabilities associated with write, network, or execution behavior.
+    remediation: Align the description with actual capabilities or remove the risky behavior.
+    confidence: medium
+    metadata:
+      detection: permission_drift
+    path_include_globs: ["SKILL.md", "**/SKILL.md"]

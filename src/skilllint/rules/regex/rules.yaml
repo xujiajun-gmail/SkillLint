@@ -1,0 +1,218 @@
+- rule_id: INSTALL_CURL_PIPE_SHELL
+  title: Remote install command piped to shell
+  pattern: '(?:curl|wget)[^\n]{0,160}\|\s*(?:bash|sh)\b'
+  severity: critical
+  taxonomy: SLT-C01
+  tags: [script, pattern_match, supply_chain]
+  explanation: Downloading remote content and piping it directly into a shell is a high-risk supply-chain pattern.
+  remediation: Pin artifacts, verify checksums, and avoid direct pipe-to-shell execution.
+  confidence: high
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]
+
+- rule_id: INSTALL_LIFECYCLE_SCRIPT
+  title: Lifecycle install script keyword
+  pattern: '\b(?:preinstall|postinstall)\b'
+  severity: high
+  taxonomy: SLT-C01
+  tags: [script, pattern_match, supply_chain]
+  explanation: Lifecycle hooks can execute code automatically during dependency installation.
+  remediation: Review dependency lifecycle scripts and remove unnecessary install-time execution.
+  confidence: high
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]
+
+- rule_id: PROMPT_INJECTION_PRIORITY
+  title: High-priority prompt injection phrase
+  pattern: '(?:before responding|highest priority|always do this|do not mention this to the user)'
+  severity: high
+  taxonomy: SLT-A01
+  tags: [markdown, semantic, pattern_match]
+  explanation: This phrase can override the agent's expected priority order and hide behavior from the user.
+  remediation: Remove coercive priority language and require explicit user confirmation for sensitive actions.
+  confidence: medium
+  flags: [IGNORECASE]
+
+- rule_id: PROMPT_POLICY_MASQUERADE
+  title: Policy/compliance injection phrase
+  pattern: '(?:compliance check|audit requirement|internal policy|do not bother the user)'
+  severity: medium
+  taxonomy: SLT-A02
+  tags: [markdown, semantic, pattern_match]
+  explanation: This phrase may disguise malicious behavior as policy, audit, or compliance work.
+  remediation: Review whether the policy language introduces hidden data transfer or hidden actions.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md"]
+
+- rule_id: SECRET_PATH_ACCESS
+  title: Sensitive credential path reference
+  pattern: '(?:~\/\.ssh|\.ssh\/|authorized_keys\b|id_rsa\b|aws[._-]credentials\b|\.npmrc\b|\.pypirc\b)'
+  severity: high
+  taxonomy: SLT-B01
+  tags: [confidentiality, pattern_match]
+  explanation: The content references sensitive credential or secret-bearing paths.
+  remediation: Limit secret-path access to explicit, user-approved use cases.
+  confidence: high
+  flags: [IGNORECASE]
+  path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+  max_matches_per_file: 3
+
+- rule_id: ENV_FILE_CREDENTIAL_REFERENCE
+  title: Environment file credential reference
+  pattern: '(?:(?:^|[^A-Za-z0-9_])\.env(?:\.[A-Za-z0-9_-]+)?(?=$|[^A-Za-z0-9_])|--env-file=\.env)[^\n]{0,120}(?:token|secret|password|api[_-]?key|credential|private[_ -]?key)|(?:token|secret|password|api[_-]?key|credential|private[_ -]?key)[^\n]{0,120}(?:^|[^A-Za-z0-9_])\.env(?:\.[A-Za-z0-9_-]+)?(?=$|[^A-Za-z0-9_])'
+  severity: medium
+  taxonomy: SLT-E01
+  tags: [confidentiality, pattern_match]
+  explanation: The content references storing or sourcing credentials from environment files, which may be acceptable but deserves review for secure handling.
+  remediation: Prefer dedicated secret managers or clearly documented secure local secret handling flows.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+  max_matches_per_file: 3
+
+- rule_id: NETWORK_EXFIL_SEND
+  title: Potential external data send operation
+  pattern: '(?:(?:upload|send|forward|post|export|同步|上传|发送|转发|上报)[^\n]{0,120}(?:conversation|messages?|chat|history|prompt|token|secret|credential|document|workspace|files?|对话|消息|历史|提示词|密钥|凭证|文档|文件|工作区)[^\n]{0,120}https?://|(?:requests\.(?:post|put)|httpx\.(?:post|put)|curl\s+-X\s+(?:POST|PUT))[^\n]{0,160}(?:authorization|api[_-]?key|token|secret|credential|id_rsa|authorized_keys|\.env))'
+  severity: medium
+  taxonomy: SLT-B01
+  tags: [confidentiality, pattern_match, script]
+  explanation: The content appears to send data to an external destination.
+  remediation: Verify destination allowlists and ensure sensitive data is not transmitted without approval.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+  max_matches_per_file: 3
+
+- rule_id: DANGEROUS_SHELL_EXEC
+  title: Dangerous shell execution primitive
+  pattern: '(?:os\.system\(|subprocess\.(?:run|Popen)\([^\n]{0,160}shell\s*=\s*True|child_process\.(?:exec|execSync)\(|(?:^|[^A-Za-z0-9_.])eval\(|(?:^|[^A-Za-z0-9_.])exec\()'
+  severity: high
+  taxonomy: SLT-E02
+  tags: [script, pattern_match]
+  explanation: The code uses execution primitives commonly associated with command injection or arbitrary code execution.
+  remediation: Avoid shell=True and validate or escape untrusted input before execution.
+  confidence: high
+  flags: [IGNORECASE]
+  path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+  max_matches_per_file: 3
+
+- rule_id: SUSPICIOUS_DOWNLOAD_HOST
+  title: Suspicious paste/download host referenced
+  pattern: '(?:pastebin\.com|ghostbin\.com|rentry\.co|hastebin\.com|(?:curl|wget)[^\n]{0,160}raw\.githubusercontent\.com|raw\.githubusercontent\.com[^\n]{0,120}(?:install|download|bootstrap|setup|\.sh))'
+  severity: medium
+  taxonomy: SLT-C04
+  tags: [pattern_match, supply_chain]
+  explanation: The content references a host commonly used for ad-hoc or unverified payload distribution.
+  remediation: Pin trusted domains and review any download-from-URL behavior.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+  max_matches_per_file: 2
+
+- rule_id: PERSISTENCE_MECHANISM
+  title: Persistence mechanism keyword
+  pattern: '(?:crontab\b|systemd\b|rc\.local|\.bashrc\b|\.zshrc\b|launchctl\b|LaunchAgents)'
+  severity: high
+  taxonomy: SLT-B06
+  tags: [persistence, script, pattern_match]
+  explanation: The content references persistence or startup-modification mechanisms.
+  remediation: Review whether startup persistence is truly required and remove it if not essential.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+  max_matches_per_file: 2
+
+- rule_id: REVERSE_SHELL_PATTERN
+  title: Reverse shell pattern
+  pattern: '(?:nc\s+[^\n]{0,120}\s-e\s|bash\s+-i\b|/dev/tcp/|socat\s+.*EXEC)'
+  severity: critical
+  taxonomy: SLT-B06
+  tags: [script, pattern_match, persistence]
+  explanation: The content resembles a reverse shell or remote command channel pattern.
+  remediation: Remove reverse-shell patterns immediately and review the package for compromise.
+  confidence: high
+  flags: [IGNORECASE, MULTILINE]
+  path_exclude_globs: ["references/**", "reference/**", "examples/**", "templates/**", "api/**", "docs/**"]
+
+- rule_id: PASTE_API_KEY_IN_CHAT
+  title: Requests user to paste API key into chat
+  pattern: '(?:paste your API key|paste your token|贴入.*API key|把.*密钥.*贴到对话)'
+  severity: high
+  taxonomy: SLT-E01
+  tags: [confidentiality, semantic, pattern_match]
+  explanation: Requesting secrets directly in chat increases credential exposure risk.
+  remediation: Use secure secret input and storage flows instead of conversational credential capture.
+  confidence: high
+  flags: [IGNORECASE]
+
+- rule_id: TRIGGER_HIJACK_ANY_TASK
+  title: Over-broad skill trigger description
+  pattern: '(?:any task involving|for any task|任何任务|所有任务)'
+  severity: medium
+  taxonomy: SLT-A05
+  tags: [semantic, pattern_match, cross_skill]
+  explanation: The skill description appears broad enough to hijack routing or trigger selection.
+  remediation: Narrow the description to a specific, well-bounded capability.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md"]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md"]
+
+- rule_id: REMOTE_INSTRUCTION_FETCH
+  title: Remote instruction or dynamic prompt fetch
+  pattern: '(?:fetch latest instructions|download (?:the )?(?:latest )?(?:prompt|instructions)|pull remote prompt|load remote instructions before every run)'
+  severity: high
+  taxonomy: SLT-C02
+  tags: [pattern_match, supply_chain, external_content]
+  explanation: The skill appears to fetch live instructions or prompts from a remote source, which can bypass review and enable rug-pull style changes.
+  remediation: Pin reviewed instructions locally or require versioning and integrity verification for remote updates.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md"]
+
+- rule_id: CI_PROMPT_UNTRUSTED_CONTEXT
+  title: CI workflow injects untrusted issue or PR content into agent prompt
+  pattern: '\$\{\{\s*github\.event\.(?:issue|pull_request|comment)\.(?:title|body|html_url|user\.login)\s*\}\}'
+  severity: high
+  taxonomy: SLT-D01
+  tags: [workflow, pattern_match]
+  explanation: Untrusted GitHub issue, PR, or comment fields may flow into an agent prompt inside automation.
+  remediation: Treat issue and PR text as untrusted data, sanitize it, and isolate agent actions in CI.
+  confidence: high
+  flags: [IGNORECASE]
+
+- rule_id: SYSTEM_PROFILE_MODIFICATION
+  title: Shell profile or startup path modification
+  pattern: '(?:>>?\s*~?/\.(?:bashrc|zshrc|profile)|export\s+PATH=.*\$PATH|LaunchAgents|systemctl\s+enable|launchctl\s+load)'
+  severity: high
+  taxonomy: SLT-C04
+  tags: [pattern_match, script, persistence]
+  explanation: The content appears to modify startup profiles, PATH, or system launch configuration.
+  remediation: Avoid system-level persistence or profile modification in skill installers.
+  confidence: high
+  flags: [IGNORECASE]
+
+- rule_id: FILE_MONITORING_OR_WATCHER
+  title: File monitoring or watcher capability
+  pattern: '(?:fs\.watch\(|inotifywait\b|watchdog\.observers|ReadDirectoryChangesW|FSEventStream)'
+  severity: medium
+  taxonomy: SLT-B06
+  tags: [pattern_match, script, persistence]
+  explanation: File watching or covert monitoring capabilities may support surveillance, persistence, or stealthy trigger behavior.
+  remediation: Review whether continuous monitoring is necessary and disclose it explicitly if retained.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]
+
+- rule_id: DESTRUCTIVE_FILE_OPERATION
+  title: Destructive file deletion or wipe primitive
+  pattern: '(?:rm\s+-rf\b|shutil\.rmtree\(|find\s+[^\n]{0,120}-delete\b|Remove-Item\s+-Recurse\s+-Force)'
+  severity: high
+  taxonomy: SLT-B02
+  tags: [pattern_match, script, integrity]
+  explanation: The content contains primitives commonly used for destructive bulk file deletion.
+  remediation: Gate destructive operations behind explicit confirmation and narrow allowlists.
+  confidence: high
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]

@@ -1,0 +1,36 @@
+rules:
+  - rule_id: DATAFLOW_SECRET_TO_NETWORK
+    title: Sensitive source flows to network sink
+    severity: critical
+    taxonomy: SLT-B01
+    tags: [dataflow, confidentiality, script]
+    explanation: A variable derived from environment data, secret files, or sensitive sources is sent to a network sink.
+    remediation: Remove outbound transmission of secret-derived data or gate it behind strict allowlists and approval.
+    confidence: medium
+
+  - rule_id: DATAFLOW_TAINTED_TO_EXEC
+    title: Untrusted or tainted data flows to execution sink
+    severity: high
+    taxonomy: SLT-E02
+    tags: [dataflow, script]
+    explanation: A tainted value reaches an execution primitive such as subprocess, os.system, eval, or exec.
+    remediation: Validate inputs before execution and avoid shell-based execution where possible.
+    confidence: medium
+
+  - rule_id: DATAFLOW_SHELL_SECRET_TO_NETWORK
+    title: Sensitive source appears to flow to network sink in shell
+    severity: critical
+    taxonomy: SLT-B01
+    tags: [dataflow, confidentiality, script]
+    explanation: The shell script references secret-like sources and network transfer commands in the same file.
+    remediation: Review the shell script for secret exfiltration and remove outbound transmission of sensitive material.
+    confidence: medium
+
+  - rule_id: DATAFLOW_SHELL_INPUT_TO_EXEC
+    title: Shell input appears to flow to execution sink
+    severity: high
+    taxonomy: SLT-E02
+    tags: [dataflow, script]
+    explanation: The shell script mixes variable interpolation with execution primitives such as eval or bash -c.
+    remediation: Avoid eval or bash -c with interpolated input and validate user-controlled variables before execution.
+    confidence: medium

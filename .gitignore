@@ -1,6 +1,16 @@
 .DS_Store
 *.pyc
+*.pyo
 __pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .venv/
 venv/
 node_modules/
+.skilllint-work/
+.skilllint-out/
+.skilllint-out-*/
+dist/
+build/
+*.egg-info/
