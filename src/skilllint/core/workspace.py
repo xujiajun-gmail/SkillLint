@@ -16,6 +16,11 @@ from skilllint.utils.files import iter_files
 
 @dataclass
 class PreparedWorkspace:
+    """一次扫描对应的归一化工作区。
+
+    SkillLint 的设计核心之一是“Normalize First”：
+    不论输入是目录、zip、URL 还是 git URL，后续检测器都只面对 normalized_dir。
+    """
     scan_id: str
     root_dir: Path
     normalized_dir: Path
@@ -38,6 +43,7 @@ class PreparedWorkspace:
 
 
 def prepare_workspace(target: TargetInfo, config: SkillLintConfig) -> PreparedWorkspace:
+    # 每次扫描使用独立目录，便于保留工件、复现问题、隔离不同输入。
     scan_id = str(uuid4())
     root_dir = Path(config.workspace.root) / f"scan-{scan_id}"
     root_dir.mkdir(parents=True, exist_ok=True)
@@ -73,12 +79,15 @@ def prepare_workspace(target: TargetInfo, config: SkillLintConfig) -> PreparedWo
 
 
 def cleanup_workspace(workspace: PreparedWorkspace, keep_artifacts: bool) -> None:
+    # 默认清理工作区，避免本地累积大量临时扫描目录；调试时可显式保留。
     if keep_artifacts:
         return
     shutil.rmtree(workspace.root_dir, ignore_errors=True)
 
 
 def _copy_directory(src: Path, dst: Path) -> None:
+    # 这里保留 symlink，而不是强制解引用，原因是：
+    # package engine 需要显式看到“包内存在 symlink”这一风险信号。
     for child in src.iterdir():
         target = dst / child.name
         if child.is_dir() and not child.is_symlink():
@@ -110,6 +119,7 @@ def _download_url(url: str, root_dir: Path, config: SkillLintConfig) -> Path:
 
 
 def _clone_repo(url: str, dst: Path) -> None:
+    # 使用 shallow clone，降低网络和磁盘成本；当前扫描只关注当前仓库快照。
     shutil.rmtree(dst, ignore_errors=True)
     dst.parent.mkdir(parents=True, exist_ok=True)
     import subprocess

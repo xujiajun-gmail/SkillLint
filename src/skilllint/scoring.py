@@ -55,6 +55,7 @@ class CorrelationPattern:
 
 
 PATTERNS: tuple[CorrelationPattern, ...] = (
+    # 这些模式不是“基础检测规则”，而是“多信号组合后更危险”的相关性放大器。
     CorrelationPattern(
         correlation_id="secret_exfil_chain",
         title="Sensitive read plus external send chain",
@@ -146,6 +147,7 @@ class CorrelationOutcome:
 
 
 def correlate_findings(findings: list[Finding]) -> CorrelationOutcome:
+    """根据同文件/同仓库内的组合信号生成 correlation hits。"""
     by_file: dict[str, list[Finding]] = defaultdict(list)
     for finding in findings:
         if finding.evidence.file:
@@ -174,6 +176,8 @@ def correlate_findings(findings: list[Finding]) -> CorrelationOutcome:
                     )
                 )
                 if pattern.synthetic_rule_id and (pattern.synthetic_rule_id, file) not in emitted_rules:
+                    # 某些高价值组合会额外生成 synthetic finding，
+                    # 方便在报告和 SARIF 中把组合风险显式展示出来。
                     correlated.append(
                         Finding(
                             id=str(uuid4()),
@@ -243,6 +247,9 @@ def correlate_findings(findings: list[Finding]) -> CorrelationOutcome:
 
 
 def build_summary(findings: list[Finding], correlation_hits: list[CorrelationHit]) -> ScanSummary:
+    # summary 同时保留两种视角：
+    # 1) risk_level：直接看 finding 严重级别
+    # 2) score_risk_level：结合 correlation 的综合分数视角
     counts = Counter(f.severity for f in findings)
     risk_level = _max_severity(findings)
     base_score = _base_score(findings)

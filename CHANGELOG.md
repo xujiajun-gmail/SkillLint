@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-14
+
+### Added
+- `docs/skilllint-system-design-and-implementation.md` for human-oriented system design and implementation guidance.
+
+### Improved
+- Added necessary Chinese code comments across core CLI, config, scanner, workspace, resolver, repository, scoring, taxonomy, package, semantic, LLM, dataflow, and Markdown reporting modules.
+- Improved maintainability and onboarding readability without changing scanner behavior.
+
 ## [0.1.1] - 2026-04-14
 
 ### Added

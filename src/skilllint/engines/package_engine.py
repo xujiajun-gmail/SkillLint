@@ -51,6 +51,8 @@ class PackageEngine(Engine):
         self.rules = {rule.rule_id: rule for rule in repository.package_rules}
 
     def run(self, workspace: PreparedWorkspace) -> list[Finding]:
+        # package engine 关注“包里带了什么”，而不是“代码究竟怎么执行”。
+        # 它是供应链/分发层风险的第一道审计。
         findings: list[Finding] = []
         files = workspace.all_files()
         skill_files = [path for path in files if path.name == "SKILL.md"]
@@ -73,6 +75,7 @@ class PackageEngine(Engine):
             if any(part in IGNORED_DIRS for part in path.parts):
                 continue
             if path.is_symlink():
+                # symlink 是需要显式暴露的风险信号，因此不沿链接继续扫描目标内容。
                 finding = self._finding(
                     "PACKAGE_SYMLINK_PRESENT",
                     evidence=Evidence(file=rel, snippet=str(path.readlink())),
@@ -128,6 +131,9 @@ class PackageEngine(Engine):
         return build_finding(rule=rule, engine=self.name, evidence=evidence)
 
     def _scan_package_json(self, path: Path, rel: str) -> list[Finding]:
+        # 这里同时看两类风险：
+        # 1) lifecycle script（安装时自动执行）
+        # 2) remote/VCS dependency（供应链来源不透明）
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
@@ -224,6 +230,9 @@ class PackageEngine(Engine):
         return findings
 
     def _scan_ci_workflow(self, path: Path, rel: str) -> list[Finding]:
+        # GitHub Actions 用简单文本解析而不是完整 YAML AST：
+        # 优点是实现轻、容错高、足够覆盖当前重点信号；
+        # 缺点是对更复杂语义场景的理解有限。
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
         except OSError:
@@ -293,6 +302,7 @@ class PackageEngine(Engine):
         return findings
 
     def _scan_dockerfile(self, path: Path, rel: str) -> list[Finding]:
+        # 当前只抓最危险、最稳定的 bootstrap 形态，避免把普通 Dockerfile 过度误报。
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
         except OSError:

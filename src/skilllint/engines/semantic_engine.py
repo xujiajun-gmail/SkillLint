@@ -46,6 +46,7 @@ class SemanticEngine(Engine):
         workspace: PreparedWorkspace,
         seed_findings: list[Finding] | None = None,
     ) -> list[Finding]:
+        """执行本地语义分析，并在需要时调用 LLM 对候选片段做二次判断。"""
         seed_findings = seed_findings or []
         findings: list[Finding] = []
         llm_candidates: list[LLMCandidate] = []
@@ -80,6 +81,7 @@ class SemanticEngine(Engine):
             )
 
         if self.config.engines.semantic.use_llm:
+            # LLM 只看已筛出的少量可疑候选片段，而不是整仓库全文送模。
             findings.extend(self.llm.analyze(_unique_candidates(llm_candidates)))
             self.last_llm_status = self.llm.status
             self.last_llm_debug_records = self.llm.debug_records
@@ -101,6 +103,7 @@ class SemanticEngine(Engine):
         findings: list[Finding] = []
         lower = text.lower()
 
+        # 前序引擎命中的 snippet 也是有价值的 LLM 候选，因为它们已经具备初步风险信号。
         for finding in seed_findings:
             if finding.evidence.snippet:
                 llm_candidates.append(
@@ -215,6 +218,7 @@ def _semantic_rule_match_range(
 
 
 def _semantic_rule_suppressed(rule: SemanticRule, segment: str) -> bool:
+    # suppression 逻辑的目标不是“绝对正确”，而是压制最常见的文档/研究/说明类误报。
     lowered = segment.lower()
     defensive_terms = [
         "do not use",

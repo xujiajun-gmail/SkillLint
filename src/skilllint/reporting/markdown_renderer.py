@@ -32,6 +32,7 @@ def _severity_badge(value: str) -> str:
 
 
 def _md_table(headers: list[str], rows: list[list[str]]) -> list[str]:
+    # 使用纯 Markdown 表格而不是模板引擎，保持输出简单、可预测、易测试。
     lines = [
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join(["---"] * len(headers)) + " |",
@@ -245,6 +246,7 @@ def _render_score_drivers(result: ScanResult) -> list[str]:
 
 
 def render_markdown(result: ScanResult, path: str | Path) -> None:
+    """把统一 ScanResult 渲染成人类可读的 Markdown 报告。"""
     correlation_lines = _render_correlation_hits(result)
     score_driver_lines = _render_score_drivers(result)
     if result.language == "zh":

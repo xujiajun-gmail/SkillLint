@@ -17,6 +17,8 @@ RULE_TAXONOMY_MAP = {
 
 
 def map_finding_taxonomy(finding: Finding) -> Finding:
+    # 当前大多数规则已在 catalog 中显式带 taxonomy；
+    # 这里保留一层兜底映射，避免历史规则或特殊 finding 丢失主分类。
     if not finding.primary_taxonomy:
         finding.primary_taxonomy = RULE_TAXONOMY_MAP.get(finding.rule_id)
     return finding

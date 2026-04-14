@@ -14,6 +14,11 @@ from skilllint.models import Confidence, Evidence, Finding, Severity
 
 
 class RuleMeta(BaseModel):
+    """所有规则元数据的公共基类。
+
+    regex / package / semantic / dataflow 都复用这一层字段，
+    从而让报告、SARIF、profile、规则过滤都能共享一致接口。
+    """
     rule_id: str
     title: str
     severity: Severity
@@ -67,6 +72,9 @@ class SemanticCatalog(BaseModel):
 
 class RuleRepository:
     def __init__(self) -> None:
+        # 规则目录与执行逻辑分离：
+        # - YAML 维护稳定元数据
+        # - Python 维护检测实现
         self._regex_catalog = _load_yaml_resource("skilllint.rules.regex", "rules.yaml", list[RegexRule])
         self._package_catalog = _load_yaml_resource(
             "skilllint.rules.package", "rules.yaml", StaticRuleCatalog
@@ -110,6 +118,7 @@ class RuleRepository:
 
 @lru_cache(maxsize=1)
 def get_rule_repository() -> RuleRepository:
+    # 规则目录在一次进程生命周期中几乎不会变化，缓存可避免重复解析 YAML。
     return RuleRepository()
 
 
@@ -121,6 +130,7 @@ def build_finding(
     related_taxonomy: list[str] | None = None,
     metadata: dict[str, Any] | None = None,
 ) -> Finding:
+    # 所有 finding 都统一在这里装配，保证不同引擎输出结构一致。
     combined_metadata = dict(rule.metadata)
     if metadata:
         combined_metadata.update(metadata)

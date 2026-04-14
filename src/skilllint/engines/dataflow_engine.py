@@ -17,6 +17,8 @@ PY_SOURCE_CALLS = {
     "os.environ.get",
     "dotenv.get_key",
 }
+# dataflow 引擎采用“实用型 source -> sink”策略：
+# 不追求完整静态分析，而优先覆盖 skill 中最常见、最危险的泄露/执行路径。
 PY_NETWORK_CALLS = {
     "requests.post",
     "requests.put",
@@ -87,6 +89,7 @@ JS_FUNCTION_PATTERNS = [
 
 @dataclass
 class Taint:
+    # kind 描述 taint 的来源类别，detail 用于最终报告/调试解释。
     kind: str
     lineno: int
     detail: str
@@ -136,6 +139,7 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
+        # 先识别 network sink，再识别 exec sink；两者复用同一套 taint 信息。
         call_name = _call_name(node)
         if _is_python_network_sink(call_name) and "DATAFLOW_SECRET_TO_NETWORK" in self.rules:
             tainted = self._find_tainted_args(node)
@@ -173,6 +177,7 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
         return None
 
     def _taint_from_expr(self, node: ast.AST, include_function_args: bool = False) -> Taint | None:
+        # 这里不是做完整 dataflow lattice，而是用递归方式覆盖最常见的传播形态。
         if isinstance(node, ast.Name):
             if node.id in self.taints:
                 return self.taints[node.id]
@@ -230,6 +235,8 @@ class DataflowEngine(Engine):
         }
 
     def run(self, workspace: PreparedWorkspace) -> list[Finding]:
+        # 按语言切换不同分析策略：
+        # Python 用 AST，shell/JS/TS 用轻量启发式。
         findings: list[Finding] = []
         for path in workspace.all_files():
             if not path.is_file():
@@ -296,6 +303,8 @@ class DataflowEngine(Engine):
         return findings
 
     def _scan_javascript(self, path: Path, workspace: PreparedWorkspace) -> list[Finding]:
+        # JS/TS 当前采取“语句块 + 模式 + 简单 taint”混合方案，
+        # 目标是尽快覆盖技能脚本中的常见泄露/执行链，而非构建完整编译器前端。
         try:
             text = read_text(path)
         except OSError:

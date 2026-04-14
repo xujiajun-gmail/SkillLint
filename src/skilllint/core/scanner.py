@@ -18,6 +18,7 @@ from skilllint.utils.language import detect_language_from_paths, dominant_source
 class SkillScanner:
     def __init__(self, config: SkillLintConfig) -> None:
         self.config = config
+        # 规则过滤器在扫描入口统一构造，后续各引擎共享同一份裁剪视图。
         self.rule_selector = RuleSelector(
             include_rule_ids=set(config.rules.include_rule_ids),
             exclude_rule_ids=set(config.rules.exclude_rule_ids),
@@ -26,10 +27,21 @@ class SkillScanner:
         )
 
     def scan(self, target: TargetInfo) -> ScanResult:
+        """执行一次完整扫描。
+
+        主流程：
+        1. 准备统一工作区
+        2. 依次运行各检测引擎
+        3. 做 taxonomy 映射与 finding correlation
+        4. 计算 summary / score breakdown
+        5. 产出统一 ScanResult
+        """
         workspace = prepare_workspace(target, self.config)
         try:
             findings, engine_meta = self._run_engines(workspace)
+            # 部分引擎会直接给出 taxonomy，部分只给 rule_id，因此在这里统一补齐。
             findings = [map_finding_taxonomy(f) for f in findings]
+            # correlation 是“第二层信号”：它不替代引擎 finding，而是放大组合风险。
             correlation_outcome = correlate_findings(findings)
             findings = correlation_outcome.findings
             findings.sort(key=self._sort_key, reverse=True)
@@ -67,6 +79,8 @@ class SkillScanner:
             cleanup_workspace(workspace, self.config.workspace.keep_artifacts)
 
     def _run_engines(self, workspace: PreparedWorkspace) -> tuple[list[Finding], dict[str, str]]:
+        # 这里使用固定顺序执行引擎，便于：
+        # 1) 行为可预测；2) semantic 能利用前序 finding 作为 seed；3) 输出更稳定。
         findings: list[Finding] = []
         engine_meta: dict[str, str] = {}
         if self.config.engines.package.enabled:
@@ -75,6 +89,7 @@ class SkillScanner:
             findings.extend(RegexEngine(self.rule_selector).run(workspace))
         if self.config.engines.semantic.enabled:
             semantic_engine = SemanticEngine(self.config, self.rule_selector)
+            # semantic engine 会读取前序 findings 作为 seed，用于 permission drift / LLM 候选选择。
             semantic_findings = semantic_engine.run(workspace, findings)
             findings.extend(semantic_findings)
             engine_meta["semantic_llm_status"] = semantic_engine.last_llm_status
@@ -85,6 +100,7 @@ class SkillScanner:
         return findings, engine_meta
 
     def _resolve_language(self, workspace: PreparedWorkspace) -> str:
+        # 若用户显式指定报告语言，则优先使用；否则基于样本内容自动判断。
         report_language = self.config.outputs.report_language
         if report_language in {"zh", "en"}:
             return report_language

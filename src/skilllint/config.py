@@ -7,6 +7,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 PROFILE_PRESETS: dict[str, dict[str, Any]] = {
+    # balanced：默认体验优先，避免在日常扫描里默认启用较重的 dataflow。
     "balanced": {
         "engines": {
             "regex": {"enabled": True},
@@ -24,6 +25,7 @@ PROFILE_PRESETS: dict[str, dict[str, Any]] = {
         }
     },
     "marketplace-review": {
+        # marketplace-review 更强调“分发/声明/供应链”相关风险。
         "engines": {
             "regex": {"enabled": True},
             "package": {"enabled": True},
@@ -42,6 +44,7 @@ PROFILE_PRESETS: dict[str, dict[str, Any]] = {
         },
     },
     "ci": {
+        # ci profile 聚焦自动化工作流劫持、远程指令与执行链风险。
         "engines": {
             "regex": {"enabled": True},
             "package": {"enabled": True},
@@ -158,6 +161,14 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 
 def load_config(path: str | Path | None = None, profile: str | None = None) -> SkillLintConfig:
+    """加载默认配置、应用 profile，再叠加用户配置文件。
+
+    合并顺序：
+    1. config/skilllint.default.yaml
+    2. profile preset
+    3. 用户传入的 config 文件
+    4. CLI 在外层再做最终覆盖
+    """
     base_path = Path("config/skilllint.default.yaml")
     base = _read_yaml(base_path)
     override = _read_yaml(Path(path)) if path is not None else {}

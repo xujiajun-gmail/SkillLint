@@ -17,6 +17,7 @@ from skilllint.reporting.sarif_renderer import render_sarif
 
 app = typer.Typer(help="SkillLint CLI", no_args_is_help=True)
 console = Console()
+# 统一维护 CLI 可接受的输出格式，避免命令处理逻辑里散落硬编码字符串。
 VALID_FORMATS = {"json", "markdown", "both", "sarif", "all"}
 
 
@@ -85,6 +86,7 @@ def scan(
         help="Enable the dataflow engine for Python and shell scripts",
     ),
 ) -> None:
+    # CLI 负责“把用户输入翻译成配置”，真正的扫描编排由 SkillScanner 负责。
     if format not in VALID_FORMATS:
         raise typer.BadParameter(f"Unsupported format: {format}. Expected one of: {', '.join(sorted(VALID_FORMATS))}")
 
@@ -92,6 +94,8 @@ def scan(
         cfg = load_config(config, profile=profile)
     except UnknownProfileError as exc:
         raise typer.BadParameter(str(exc)) from exc
+
+    # 命令行参数优先级高于 profile / config 文件，因此在这里做最终覆盖。
     cfg.outputs.report_language = lang
     cfg.outputs.format = format
     cfg.engines.semantic.use_llm = use_llm
@@ -114,6 +118,7 @@ def scan(
     if resolved.normalized_type == "unknown":
         raise typer.BadParameter(f"Unsupported target: {target}")
 
+    # 扫描阶段只关心统一后的 TargetInfo，不再关心原始输入是目录、zip 还是 URL。
     result = SkillScanner(cfg).scan(resolved)
 
     output.mkdir(parents=True, exist_ok=True)

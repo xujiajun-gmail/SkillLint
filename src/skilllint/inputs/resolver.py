@@ -9,6 +9,10 @@ GIT_HOSTS = {"github.com", "gitlab.com"}
 
 
 def resolve_target(target: str) -> TargetInfo:
+    """把用户输入解析为统一的 TargetInfo。
+
+    该层只做“类型识别”，不做下载、解压、clone；真正的物理准备由 workspace 层负责。
+    """
     path = Path(target)
     if path.exists() and path.is_dir():
         return TargetInfo(raw=target, normalized_type="directory", resolved_path=str(path.resolve()))
@@ -25,6 +29,7 @@ def resolve_target(target: str) -> TargetInfo:
 
 
 def _looks_like_git_repo(parsed) -> bool:
+    # 当前只做轻量启发式识别：命中常见 git host，且路径不像直接下载的压缩包。
     if parsed.netloc not in GIT_HOSTS:
         return False
     path_parts = [part for part in parsed.path.split("/") if part]

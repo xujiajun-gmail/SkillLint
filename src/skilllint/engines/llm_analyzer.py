@@ -12,6 +12,7 @@ from skilllint.models import Confidence, Evidence, Finding, Severity, severity_r
 
 @dataclass(frozen=True)
 class LLMCandidate:
+    # LLM 不直接分析整仓库，只分析少量“可解释的候选片段”。
     file: str
     line_start: int | None
     line_end: int | None
@@ -175,6 +176,7 @@ class LLMAnalyzer:
         return list(self._debug_records)
 
     def analyze(self, candidates: list[LLMCandidate]) -> list[Finding]:
+        # debug 记录是一次 analyze 调用级别的，因此每轮开始前清空。
         self._debug_records = []
         if not candidates:
             self._status = "no-candidates"
@@ -184,6 +186,7 @@ class LLMAnalyzer:
             return []
 
         findings: list[Finding] = []
+        # 限制候选数量，控制成本、延迟与不稳定性。
         for candidate in candidates[:6]:
             response_data = self._analyze_candidate(client, candidate)
             findings.extend(self._build_findings(candidate, response_data))
@@ -191,6 +194,7 @@ class LLMAnalyzer:
         return _dedupe_findings(findings)
 
     def _build_findings(self, candidate: LLMCandidate, response_data: dict[str, Any]) -> list[Finding]:
+        # 外部 LLM 返回 plain-language label，本地再映射为稳定 rule_id / taxonomy。
         findings: list[Finding] = []
         for item in response_data.get("findings", []):
             label = _normalize_label(item.get("label"))
@@ -316,6 +320,7 @@ class LLMAnalyzer:
 
 
 def _build_prompt(candidate: LLMCandidate) -> str:
+    # prompt 不暴露内部 taxonomy code 语义，避免让外部模型“硬猜内部编码体系”。
     labels_text = "\n".join(
         f"- {spec.label}: {spec.description}" for spec in SEMANTIC_LABEL_SPECS.values()
     )
@@ -377,6 +382,7 @@ def _normalize_confidence(value: Any) -> Confidence:
 
 
 def _dedupe_findings(findings: list[Finding]) -> list[Finding]:
+    # 不同候选片段可能会让 LLM 重复报告同一逻辑问题，因此要做二次去重。
     deduped: list[Finding] = []
     for finding in findings:
         matched_index: int | None = None
