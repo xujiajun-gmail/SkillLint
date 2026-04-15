@@ -24,7 +24,7 @@
 
 - rule_id: PROMPT_INJECTION_PRIORITY
   title: High-priority prompt injection phrase
-  pattern: '(?:before responding|always do this|do not mention this to the user)'
+  pattern: '(?:before responding|always do this|do not mention this to the user|ignore previous instructions)'
   severity: high
   taxonomy: SLT-A01
   tags: [markdown, semantic, pattern_match]
@@ -207,12 +207,48 @@
 
 - rule_id: DESTRUCTIVE_FILE_OPERATION
   title: Destructive file deletion or wipe primitive
-  pattern: '(?:rm\s+-rf\b|shutil\.rmtree\(|find\s+[^\n]{0,120}-delete\b|Remove-Item\s+-Recurse\s+-Force)'
+  pattern: '(?:rm\s+-rf\b|shutil\.rmtree\(|find\s+[^\n]{0,120}-delete\b|Remove-Item\s+-Recurse\s+-Force|dd\s+if=/dev/zero\s+of=/dev/(?:disk|sd|nvme))'
   severity: high
   taxonomy: SLT-B02
   tags: [pattern_match, script, integrity]
   explanation: The content contains primitives commonly used for destructive bulk file deletion.
   remediation: Gate destructive operations behind explicit confirmation and narrow allowlists.
   confidence: high
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]
+
+- rule_id: MEMORY_FILE_PERSISTENCE_WRITE
+  title: Writes instructions into persistent memory file
+  pattern: '(?:>>?\s*MEMORY\.md\b|append[^\n]{0,120}MEMORY\.md\b|memory\.md[^\n]{0,120}(?:future sessions|future chats|reuse))'
+  severity: high
+  taxonomy: SLT-B04
+  tags: [pattern_match, persistence, workspace]
+  explanation: The content appears to append instructions or state into a long-lived memory file.
+  remediation: Limit writes to persistent memory files to explicit, user-approved, low-risk data.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]
+
+- rule_id: WORKSPACE_ENV_FILE_WRITE
+  title: Writes or overwrites workspace environment file
+  pattern: '(?:>>?\s*\.env\b|cat[^\n]{0,160}>\s*\.env\b|echo[^\n]{0,160}>>?\s*\.env\b|overwrite[^\n]{0,120}\.env\b)'
+  severity: medium
+  taxonomy: SLT-C04
+  tags: [pattern_match, workspace, persistence]
+  explanation: The content modifies a workspace .env file, which may influence later execution or secret handling.
+  remediation: Avoid mutating workspace environment files during skill setup unless explicitly approved and tightly scoped.
+  confidence: medium
+  flags: [IGNORECASE]
+  path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]
+
+- rule_id: WORKSPACE_RULES_FILE_WRITE
+  title: Writes rules into workspace control file
+  pattern: '(?:\.cursor/rules\.mdc\b|rules\.mdc[^\n]{0,120}\.cursor|append[^\n]{0,120}rules\.mdc|cat[^\n]{0,160}>\s*\.cursor/rules\.mdc\b)'
+  severity: high
+  taxonomy: SLT-C04
+  tags: [pattern_match, workspace, persistence]
+  explanation: The content modifies workspace rules files, which may alter future agent behavior in a stealthy way.
+  remediation: Avoid writing to workspace rules files unless explicitly approved and clearly disclosed.
+  confidence: medium
   flags: [IGNORECASE]
   path_include_globs: ["SKILL.md", "**/SKILL.md", "README.md", "**/README.md", "scripts/**", "bin/**", "hooks/**", "resources/**"]

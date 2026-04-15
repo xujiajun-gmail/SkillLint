@@ -81,6 +81,18 @@ def _is_context_suppressed(rule_id: str, text: str, line_start: int, line_end: i
     因此这里用轻量 suppression 对最常见场景做兜底。
     """
     context = extract_snippet(text, line_start, line_end, radius=1).lower()
+    explicit_concealment_terms = [
+        "do not tell the user",
+        "without telling the user",
+        "do not bother the user",
+        "do not mention this to the user",
+        "quietly collect",
+        "silently",
+        "不要告诉用户",
+        "不要打扰用户",
+        "悄悄",
+        "静默",
+    ]
     defensive_terms = [
         "must not",
         "do not",
@@ -114,6 +126,16 @@ def _is_context_suppressed(rule_id: str, text: str, line_start: int, line_end: i
         "clear:",
         "anti-pattern",
     ]
+    # “Do not tell the user / quietly collect” 属于显式隐蔽恶意语境，
+    # 不能因为包含 do not / silently 之类词就被误当作防御性说明文档压掉。
+    if rule_id in {
+        "SECRET_PATH_ACCESS",
+        "ENV_FILE_CREDENTIAL_REFERENCE",
+        "NETWORK_EXFIL_SEND",
+        "PROMPT_INJECTION_PRIORITY",
+        "PROMPT_POLICY_MASQUERADE",
+    } and any(term in context for term in explicit_concealment_terms):
+        return False
     if rule_id in {"SECRET_PATH_ACCESS", "ENV_FILE_CREDENTIAL_REFERENCE"}:
         if any(term in context for term in defensive_terms + instructional_terms):
             return True

@@ -133,3 +133,93 @@ rules:
     explanation: The Dockerfile downloads or executes remote content during image build, which can introduce unreviewed supply-chain behavior.
     remediation: Prefer pinned local artifacts, verify integrity, and avoid piping remote content directly to a shell.
     confidence: high
+
+  - rule_id: PACKAGE_MANIFEST_RISKY_PERMISSION
+    title: Skill manifest declares risky permission or capability
+    severity: medium
+    taxonomy: SLT-C04
+    tags: [package_structure, manifest, permissions]
+    explanation: The skill manifest declares a capability such as shell access, unrestricted network, or full filesystem access that deserves closer review.
+    remediation: Narrow manifest permissions to the least privilege necessary and disclose risky capabilities clearly.
+    confidence: high
+
+  - rule_id: PACKAGE_MANIFEST_STARTUP_HOOK
+    title: Skill manifest declares startup or bootstrap hook
+    severity: high
+    taxonomy: SLT-C01
+    tags: [package_structure, manifest, supply_chain]
+    explanation: Startup or bootstrap hooks can introduce implicit execution before normal skill use.
+    remediation: Avoid startup hooks where possible, and review or disclose any retained bootstrap behavior explicitly.
+    confidence: high
+
+  - rule_id: PACKAGE_MANIFEST_LOCAL_ENDPOINT
+    title: Skill manifest references localhost or private-network endpoint
+    severity: medium
+    taxonomy: SLT-B01
+    tags: [package_structure, manifest, network]
+    explanation: The skill manifest references local or private-network endpoints, which may reach sensitive internal services.
+    remediation: Restrict local or private-network access and review whether these endpoints are truly required.
+    confidence: high
+
+  - rule_id: PACKAGE_MANIFEST_METADATA_ENDPOINT
+    title: Skill manifest references metadata service endpoint
+    severity: high
+    taxonomy: SLT-B01
+    tags: [package_structure, manifest, network]
+    explanation: The skill manifest references a cloud metadata endpoint, which can expose credentials or instance metadata.
+    remediation: Remove metadata-service access unless it is explicitly required, tightly constrained, and clearly disclosed.
+    confidence: high
+
+  - rule_id: PACKAGE_MANIFEST_FLOATING_REFERENCE
+    title: Skill manifest uses floating repository or update reference
+    severity: medium
+    taxonomy: SLT-C01
+    tags: [package_structure, manifest, supply_chain]
+    explanation: The manifest references a floating location such as a latest channel, which can change without review.
+    remediation: Prefer versioned, pinned, and reviewable repository or update references.
+    confidence: medium
+
+  - rule_id: PACKAGE_MANIFEST_IDENTITY_MISMATCH
+    title: Skill manifest identity conflicts with SKILL.md title
+    severity: medium
+    taxonomy: SLT-C04
+    tags: [package_structure, manifest, trust]
+    explanation: The manifest name and the primary SKILL.md title appear inconsistent, which can indicate trust or identity mismatch.
+    remediation: Align manifest name, documentation title, and repository identity so reviewers can validate provenance easily.
+    confidence: medium
+
+  - rule_id: PACKAGE_MANIFEST_UNDERDECLARED_NETWORK
+    title: Skill manifest network capability conflicts with offline or no-network claim
+    severity: high
+    taxonomy: SLT-E03
+    tags: [package_structure, manifest, alignment]
+    explanation: The manifest declares network access or remote endpoints while the SKILL.md claims offline or no-network behavior.
+    remediation: Align the documentation with actual network capabilities or remove the undeclared network behavior.
+    confidence: high
+
+  - rule_id: PACKAGE_MANIFEST_UNDERDECLARED_SHELL
+    title: Skill manifest shell capability conflicts with no-shell claim
+    severity: high
+    taxonomy: SLT-E03
+    tags: [package_structure, manifest, alignment]
+    explanation: The manifest declares shell access or bootstrap hooks while the SKILL.md claims it does not execute commands.
+    remediation: Align the documentation with actual shell capabilities or remove the undeclared execution behavior.
+    confidence: high
+
+  - rule_id: PACKAGE_MANIFEST_UNDERDECLARED_WRITE
+    title: Skill manifest write capability conflicts with read-only claim
+    severity: high
+    taxonomy: SLT-E03
+    tags: [package_structure, manifest, alignment]
+    explanation: The manifest declares full filesystem or write-like capability while the SKILL.md claims read-only behavior.
+    remediation: Align the documentation with actual write capabilities or remove the undeclared write behavior.
+    confidence: high
+
+  - rule_id: PACKAGE_HIDDEN_UNICODE_MARKER
+    title: Hidden unicode or zero-width marker present
+    severity: medium
+    taxonomy: SLT-C04
+    tags: [package_structure, manifest, trust]
+    explanation: The package contains hidden unicode markers such as zero-width characters that can obscure review or intent.
+    remediation: Remove hidden unicode markers and normalize text content before distribution.
+    confidence: high

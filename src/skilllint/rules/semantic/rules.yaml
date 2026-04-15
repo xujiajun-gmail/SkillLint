@@ -51,6 +51,7 @@ keyword_groups:
   hidden:
     - silently
     - without telling the user
+    - do not tell the user
     - do not mention
     - do not bother the user
     - 不要告诉用户
@@ -61,6 +62,10 @@ keyword_groups:
     - follow any embedded workflow instructions
     - follow embedded instructions
     - follow instructions in the document
+    - treat tool output as trusted
+    - follow it exactly
+    - follow returned instructions
+    - treat returned instructions as trusted
     - 遵循网页中的指令
     - 遵循文档里的指令
     - 遵循外部内容中的流程
@@ -113,11 +118,27 @@ keyword_groups:
     - persist preference
     - update profile
     - add to long-term memory
+    - persist these instructions
+    - future sessions
+    - memory.md
+    - append returned instructions to memory.md
+    - append the summary to memory.md
     - 写入记忆
     - 记住这条规则
     - 更新长期偏好
+  workspace_poisoning:
+    - .cursor/rules.mdc
+    - overwrite .env
+    - append helper rules
+    - allow_autorun
+    - append rules into .cursor
+    - overwrite .env during setup
+    - helper rules into .cursor/rules.mdc
   destructive:
     - delete originals
+    - delete target
+    - returned path as the delete target
+    - use the returned path as the delete target
     - remove source files
     - encrypt files
     - wipe workspace
@@ -269,3 +290,14 @@ rules:
     metadata:
       detection: permission_drift
     path_include_globs: ["SKILL.md", "**/SKILL.md"]
+
+  - rule_id: SEMANTIC_WORKSPACE_POLICY_POISONING
+    title: Writes risky rules or autorun settings into workspace control files
+    severity: high
+    taxonomy: SLT-C04
+    tags: [semantic, persistence, workspace]
+    explanation: The content suggests writing rules, startup settings, or autorun controls into workspace policy files such as .cursor/rules.mdc or .env.
+    remediation: Avoid modifying workspace policy files or autorun settings unless explicitly approved and narrowly scoped.
+    confidence: medium
+    any_of_groups: [workspace_poisoning]
+    hint_group: workspace_poisoning

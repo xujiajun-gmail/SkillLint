@@ -53,6 +53,21 @@ PY_EXEC_CALLS = {
     "eval",
     "exec",
 }
+PY_LOG_CALLS = {
+    "print",
+    "logging.debug",
+    "logging.info",
+    "logging.warning",
+    "logging.error",
+    "logging.critical",
+    "logging.exception",
+    "logger.debug",
+    "logger.info",
+    "logger.warning",
+    "logger.error",
+    "logger.critical",
+    "logger.exception",
+}
 SECRET_PATH_PATTERNS = [r"~?/\.ssh", r"\.env\b", r"authorized_keys", r"id_rsa", r"\.npmrc\b"]
 SHELL_SOURCE_PATTERNS = [r"\$[A-Z_][A-Z0-9_]*", r"\.env\b", r"~?/\.ssh", r"authorized_keys", r"id_rsa"]
 SHELL_NETWORK_PATTERNS = [r"curl\b", r"wget\b", r"nc\b", r"scp\b", r"rsync\b", r"python\s+-c.*requests\.post"]
@@ -149,6 +164,17 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
                 self.findings.append(
                     _finding_from_call(
                         rule=self.rules["DATAFLOW_SECRET_TO_NETWORK"],
+                        lineno=node.lineno,
+                        text=self.text,
+                        detail=tainted.detail,
+                    )
+                )
+        if _is_python_log_sink(call_name) and "DATAFLOW_SECRET_TO_LOG" in self.rules:
+            tainted = self._find_tainted_args(node)
+            if tainted:
+                self.findings.append(
+                    _finding_from_call(
+                        rule=self.rules["DATAFLOW_SECRET_TO_LOG"],
                         lineno=node.lineno,
                         text=self.text,
                         detail=tainted.detail,
@@ -304,6 +330,21 @@ class DataflowEngine(Engine):
                     ),
                 )
             )
+        if "DATAFLOW_SHELL_TAINTED_DELETE_TARGET" in self.rules:
+            destructive_line = _first_shell_tainted_delete_line(text)
+            if destructive_line is not None:
+                findings.append(
+                    build_finding(
+                        rule=self.rules["DATAFLOW_SHELL_TAINTED_DELETE_TARGET"],
+                        engine=self.name,
+                        evidence=Evidence(
+                            file=rel,
+                            line_start=destructive_line,
+                            line_end=destructive_line,
+                            snippet=extract_snippet(text, destructive_line, destructive_line, radius=1),
+                        ),
+                    )
+                )
         return findings
 
     def _scan_javascript(self, path: Path, workspace: PreparedWorkspace) -> list[Finding]:
@@ -407,6 +448,23 @@ def _is_python_exec_sink(call_name: str | None) -> bool:
     )
 
 
+def _is_python_log_sink(call_name: str | None) -> bool:
+    if call_name is None:
+        return False
+    if call_name in PY_LOG_CALLS:
+        return True
+    return call_name.endswith(
+        (
+            ".debug",
+            ".info",
+            ".warning",
+            ".error",
+            ".critical",
+            ".exception",
+        )
+    )
+
+
 
 def _extract_names(node: ast.AST) -> list[str]:
     if isinstance(node, ast.Name):
@@ -470,6 +528,21 @@ def _first_interesting_lines(text: str, patterns: list[str]) -> tuple[int, int]:
         if any(re.search(pattern, line) for pattern in patterns):
             return idx, idx
     return 1, 1
+
+
+def _first_shell_tainted_delete_line(text: str) -> int | None:
+    destructive_patterns = [
+        re.compile(r"\brm\s+-[^\n]*\brf\b[^\n]*\$(?:\{[A-Za-z_][A-Za-z0-9_]*\}|[A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE),
+        re.compile(r"\bfind\b[^\n]*\$(?:\{[A-Za-z_][A-Za-z0-9_]*\}|[A-Za-z_][A-Za-z0-9_]*)[^\n]*-delete\b", re.IGNORECASE),
+        re.compile(
+            r"\bremove-item\b[^\n]*\$(?:\{[A-Za-z_][A-Za-z0-9_]*\}|[A-Za-z_][A-Za-z0-9_]*)[^\n]*-(?:recurse|force)",
+            re.IGNORECASE,
+        ),
+    ]
+    for idx, line in enumerate(text.splitlines(), start=1):
+        if any(pattern.search(line) for pattern in destructive_patterns):
+            return idx
+    return None
 
 
 

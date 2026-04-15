@@ -52,3 +52,21 @@ rules:
     explanation: A tainted value or function argument appears to reach child_process, execa, or similar execution sinks in JavaScript or TypeScript.
     remediation: Validate inputs before execution and avoid shell-style execution of interpolated input.
     confidence: medium
+
+  - rule_id: DATAFLOW_SECRET_TO_LOG
+    title: Sensitive source flows to console or logging sink
+    severity: high
+    taxonomy: SLT-E01
+    tags: [dataflow, confidentiality, script]
+    explanation: A value derived from environment data or secret files appears to be printed or written to logs.
+    remediation: Avoid logging secret-derived values and redact sensitive material before printing or telemetry export.
+    confidence: medium
+
+  - rule_id: DATAFLOW_SHELL_TAINTED_DELETE_TARGET
+    title: Shell variable flows into destructive delete target
+    severity: high
+    taxonomy: SLT-B02
+    tags: [dataflow, script, integrity]
+    explanation: A shell variable appears to control the target of a destructive delete operation such as rm -rf.
+    remediation: Avoid passing untrusted variables into destructive delete targets and gate deletion behind narrow allowlists.
+    confidence: medium
