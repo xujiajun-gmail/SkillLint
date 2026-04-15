@@ -10,6 +10,14 @@ from uuid import uuid4
 import httpx
 
 from skilllint.config import SkillLintConfig
+from skilllint.core.input_validation import (
+    InputValidationError,
+    safe_archive_path,
+    select_skill_root,
+    validate_local_directory_source,
+    validate_skill_tree,
+    validate_zip_members,
+)
 from skilllint.models import TargetInfo, WorkspaceInfo
 from skilllint.utils.files import iter_files
 
@@ -49,16 +57,20 @@ def prepare_workspace(target: TargetInfo, config: SkillLintConfig) -> PreparedWo
     scan_id = str(uuid4())
     root_dir = Path(config.workspace.root) / f"scan-{scan_id}"
     root_dir.mkdir(parents=True, exist_ok=True)
-    normalized_dir = root_dir / "normalized"
-    normalized_dir.mkdir(parents=True, exist_ok=True)
+    normalized_root = root_dir / "normalized"
+    normalized_root.mkdir(parents=True, exist_ok=True)
+    normalized_dir = normalized_root
 
     extracted_from: str | None = None
 
     if target.normalized_type == "directory":
-        _copy_directory(Path(target.resolved_path or target.raw), normalized_dir)
+        source_dir = validate_local_directory_source(Path(target.resolved_path or target.raw), config)
+        _copy_directory(source_dir, normalized_dir)
     elif target.normalized_type == "zip":
-        extracted_from = str(Path(target.resolved_path or target.raw))
-        _extract_zip(Path(target.resolved_path or target.raw), normalized_dir)
+        archive_path = Path(target.resolved_path or target.raw)
+        extracted_from = str(archive_path)
+        _validate_local_archive_size(archive_path, config)
+        _extract_zip(archive_path, normalized_dir, config)
     elif target.normalized_type == "git":
         _clone_repo(target.resolved_path or target.raw, normalized_dir)
     elif target.normalized_type == "url":
@@ -66,11 +78,14 @@ def prepare_workspace(target: TargetInfo, config: SkillLintConfig) -> PreparedWo
         extracted_from = str(downloaded)
         # URL 下载后再按文件类型分流：zip 解压，单文件则直接暂存。
         if downloaded.suffix.lower() == ".zip":
-            _extract_zip(downloaded, normalized_dir)
+            _extract_zip(downloaded, normalized_dir, config)
         else:
             _stage_single_file(downloaded, normalized_dir)
     else:
         raise ValueError(f"Unsupported target type: {target.normalized_type}")
+
+    normalized_dir = select_skill_root(normalized_root)
+    validate_skill_tree(normalized_dir, config)
 
     return PreparedWorkspace(
         scan_id=scan_id,
@@ -103,10 +118,21 @@ def _copy_directory(src: Path, dst: Path) -> None:
                 shutil.copy2(child, target)
 
 
-def _extract_zip(zip_path: Path, dst: Path) -> None:
-    # 当前保持简单 extractall；真正的“压缩包内容是否危险”由 package engine 再检查。
-    with zipfile.ZipFile(zip_path) as zf:
-        zf.extractall(dst)
+def _extract_zip(zip_path: Path, dst: Path, config: SkillLintConfig) -> None:
+    # zip 在真正落盘前先做成员级校验，避免 zip slip、过大展开、异常层级等问题。
+    try:
+        with zipfile.ZipFile(zip_path) as zf:
+            infos = zf.infolist()
+            validate_zip_members(infos, config)
+            for info in infos:
+                if info.is_dir():
+                    continue
+                target = dst / safe_archive_path(info.filename, config)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with zf.open(info) as src, target.open("wb") as out:
+                    shutil.copyfileobj(src, out)
+    except zipfile.BadZipFile as exc:
+        raise InputValidationError(f"Invalid zip archive: {zip_path}") from exc
 
 
 def _download_url(url: str, root_dir: Path, config: SkillLintConfig) -> Path:
@@ -115,10 +141,26 @@ def _download_url(url: str, root_dir: Path, config: SkillLintConfig) -> Path:
     filename = Path(parsed.path).name or "downloaded-skill"
     download_path = root_dir / filename
     timeout = httpx.Timeout(config.inputs.download_timeout_seconds)
+    max_bytes = config.inputs.max_archive_size_mb * 1024 * 1024
     with httpx.stream("GET", url, timeout=timeout, follow_redirects=True) as response:
         response.raise_for_status()
+        header_size = response.headers.get("content-length")
+        if header_size is not None:
+            try:
+                if int(header_size) > max_bytes:
+                    raise InputValidationError(
+                        f"Remote input is too large: {int(header_size)} bytes > {max_bytes} bytes."
+                    )
+            except ValueError:
+                pass
         with download_path.open("wb") as f:
+            total = 0
             for chunk in response.iter_bytes():
+                total += len(chunk)
+                if total > max_bytes:
+                    raise InputValidationError(
+                        f"Remote input is too large: {total} bytes > {max_bytes} bytes."
+                    )
                 f.write(chunk)
     return download_path
 
@@ -136,3 +178,13 @@ def _stage_single_file(path: Path, dst: Path) -> None:
     # 对非压缩包 URL，统一放入 normalized 根目录，保持后续检测器的遍历入口一致。
     name = path.name or "downloaded-skill"
     shutil.copy2(path, dst / name)
+
+
+def _validate_local_archive_size(path: Path, config: SkillLintConfig) -> None:
+    max_bytes = config.inputs.max_archive_size_mb * 1024 * 1024
+    try:
+        size = path.stat().st_size
+    except OSError as exc:  # pragma: no cover
+        raise InputValidationError(f"Unable to inspect archive: {path}") from exc
+    if size > max_bytes:
+        raise InputValidationError(f"Archive is too large: {size} bytes > {max_bytes} bytes.")

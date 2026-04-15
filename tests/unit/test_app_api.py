@@ -107,3 +107,45 @@ def test_scan_url_endpoint(monkeypatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["scan_result"]["target"]["normalized_type"] == "url"
+
+
+def test_scan_archive_endpoint_rejects_non_skill_archive(tmp_path: Path) -> None:
+    archive = tmp_path / "bad.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("README.md", "not a skill")
+
+    with archive.open("rb") as handle:
+        response = client.post(
+            "/api/scan/archive",
+            files={"file": ("bad.zip", handle, "application/zip")},
+            data={
+                "language": "en",
+                "use_dataflow": "true",
+                "use_llm": "false",
+            },
+        )
+
+    assert response.status_code == 400
+    assert "SKILL.md" in response.json()["detail"]
+
+
+def test_scan_directory_endpoint_rejects_too_many_files() -> None:
+    files = [("files", ("SKILL.md", b"# Test Skill\n", "text/markdown"))]
+    relative_paths = ["SKILL.md"]
+    for index in range(1000):
+        files.append(("files", (f"docs/file-{index}.txt", b"x", "text/plain")))
+        relative_paths.append(f"docs/file-{index}.txt")
+
+    response = client.post(
+        "/api/scan/directory",
+        files=files,
+        data={
+            "relative_paths": json.dumps(relative_paths),
+            "language": "en",
+            "use_dataflow": "true",
+            "use_llm": "false",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "1000" in response.json()["detail"]

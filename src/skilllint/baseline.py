@@ -57,6 +57,8 @@ def build_baseline_dataset(
     # baseline 的目的不是判定恶意，而是形成“当前规则在真实样本上的回归快照”。
     targets = load_example_targets(root)
     cfg = load_config(config_path, profile=profile)
+    # baseline 语料更强调“扫描回归稳定性”，允许少量非标准 skill 样本继续进入扫描。
+    cfg.inputs.require_skill_entry = False
     scanner = SkillScanner(cfg)
 
     sample_results: list[dict] = []

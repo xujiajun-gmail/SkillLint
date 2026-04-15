@@ -8,6 +8,12 @@ inputs:
   allow_remote: true
   download_timeout_seconds: 60
   max_archive_size_mb: 100
+  max_input_files: 1000
+  max_single_file_mb: 20
+  max_total_input_mb: 200
+  max_path_depth: 20
+  max_path_length: 240
+  require_skill_entry: true
 outputs:
   format: both
   json_file: result.json

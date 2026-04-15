@@ -7,6 +7,7 @@ from rich.console import Console
 from rich.table import Table
 
 from skilllint.config import UnknownProfileError, available_profiles, load_config
+from skilllint.core.input_validation import InputValidationError
 from skilllint.core.scanner import SkillScanner
 from skilllint.evaluation import evaluate_golden_dataset, render_evaluation_markdown
 from skilllint.inputs.resolver import resolve_target
@@ -122,7 +123,10 @@ def scan(
         raise typer.BadParameter(f"Unsupported target: {target}")
 
     # 扫描阶段只关心统一后的 TargetInfo，不再关心原始输入是目录、zip 还是 URL。
-    result = SkillScanner(cfg).scan(resolved)
+    try:
+        result = SkillScanner(cfg).scan(resolved)
+    except InputValidationError as exc:
+        raise typer.BadParameter(str(exc)) from exc
 
     output.mkdir(parents=True, exist_ok=True)
     # renderer 是纯输出层：不会再改动 finding，只把 ScanResult 投影成不同格式。

@@ -84,7 +84,11 @@ def evaluate_golden_dataset(
     # golden evaluation 复用正式扫描链路，避免“评估时走的是另一套逻辑”。
     dataset = load_golden_dataset(dataset_path)
     selected_profile = profile or dataset.profile
-    scanner = SkillScanner(load_config(config_path, profile=selected_profile))
+    cfg = load_config(config_path, profile=selected_profile)
+    # golden fixtures 包含少量“刻意无效/异常输入”样本，
+    # 评估时需要继续扫描它们，以验证 PACKAGE_MISSING_SKILL_MD 等规则是否仍然命中。
+    cfg.inputs.require_skill_entry = False
+    scanner = SkillScanner(cfg)
 
     verdict_matches = 0
     risk_matches = 0
