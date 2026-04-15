@@ -14,9 +14,6 @@ const i18n = {
     directoryHint: "The browser sends all files plus their relative paths.",
     urlLabel: "Remote archive or git repository URL",
     reportLanguageLabel: "Report language",
-    enginePresetLabel: "Engine preset",
-    enginePresetHint:
-      "The web app uses the default SkillLint scan baseline and exposes only scan-related toggles.",
     autoOption: "auto",
     useDataflow: "Enable dataflow analysis",
     useLlm: "Enable optional LLM semantic review",
@@ -55,6 +52,9 @@ const i18n = {
     explanation: "Explanation",
     remediation: "Remediation",
     noSource: "Select a finding to inspect the source location.",
+    noFileLocation: "This finding does not have a file-level source location.",
+    sourceUnavailable: "The original source file is unavailable in the current response.",
+    snippet: "Snippet",
     truncated: "The file content is truncated for transport safety.",
     copyOk: "Copied",
     apiReady: "API ready",
@@ -77,8 +77,6 @@ const i18n = {
     directoryHint: "浏览器会连同相对路径一起上传所有文件。",
     urlLabel: "远程压缩包或 git 仓库 URL",
     reportLanguageLabel: "报告语言",
-    enginePresetLabel: "引擎基线",
-    enginePresetHint: "网页应用固定使用 SkillLint 默认扫描基线，只暴露和 scan 直接相关的开关。",
     autoOption: "自动",
     useDataflow: "启用 dataflow 分析",
     useLlm: "启用可选的 LLM 语义复核",
@@ -117,6 +115,9 @@ const i18n = {
     explanation: "原因说明",
     remediation: "修复建议",
     noSource: "点击左侧 finding 后，可以在这里查看源码定位。",
+    noFileLocation: "这个 finding 没有文件级源码定位信息。",
+    sourceUnavailable: "当前响应中没有返回对应的原始源码文件。",
+    snippet: "片段",
     truncated: "为避免传输过大，文件内容已截断。",
     copyOk: "已复制",
     apiReady: "API 可用",
@@ -165,13 +166,7 @@ document.querySelectorAll("[data-lang-ui]").forEach((button) => {
 });
 
 document.querySelectorAll(".source-btn").forEach((button) => {
-  button.addEventListener("click", () => {
-    state.sourceType = button.dataset.source;
-    document.querySelectorAll(".source-btn").forEach((item) => item.classList.toggle("is-active", item === button));
-    document.querySelectorAll(".source-pane").forEach((pane) => {
-      pane.classList.toggle("is-active", pane.dataset.pane === state.sourceType);
-    });
-  });
+  button.addEventListener("click", () => setSourceType(button.dataset.source));
 });
 
 document.querySelectorAll(".tab-btn").forEach((button) => {
@@ -198,9 +193,10 @@ els.copyJsonBtn.addEventListener("click", async () => {
 els.scanForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearError();
-  setLoading(true);
   try {
-    const response = await submitScan();
+    const responsePromise = submitScan();
+    setLoading(true);
+    const response = await responsePromise;
     state.response = response;
     state.selectedFindingId = response.scan_result.findings[0]?.id ?? null;
     renderReport();
@@ -212,6 +208,8 @@ els.scanForm.addEventListener("submit", async (event) => {
 });
 
 async function submitScan() {
+  const activeSource = document.querySelector(".source-btn.is-active")?.dataset.source || state.sourceType;
+  state.sourceType = activeSource;
   const options = {
     language: els.reportLanguage.value,
     use_dataflow: els.useDataflow.checked,
@@ -242,15 +240,16 @@ async function submitScan() {
     return parseApiResponse(response);
   }
 
-  const files = Array.from(els.directoryFiles.files);
+  const files = Array.from(els.directoryFiles.files || []);
   if (!files.length) {
     throw new Error(i18n[state.uiLanguage].sourceTypeMissing);
   }
   const form = new FormData();
   const relativePaths = [];
   files.forEach((file) => {
-    form.append("files", file, file.name);
-    relativePaths.push(file.webkitRelativePath || file.name);
+    const relativePath = file.webkitRelativePath || file.name;
+    form.append("files", file, relativePath);
+    relativePaths.push(relativePath);
   });
   form.append("relative_paths", JSON.stringify(relativePaths));
   Object.entries(options).forEach(([key, value]) => form.append(key, String(value)));
@@ -277,6 +276,19 @@ function renderLanguage() {
     button.classList.toggle("is-active", button.dataset.langUi === state.uiLanguage);
   });
   els.reportLanguage.querySelector('option[value="auto"]').textContent = dict.autoOption;
+}
+
+function setSourceType(sourceType) {
+  state.sourceType = sourceType;
+  document.querySelectorAll(".source-btn").forEach((item) => {
+    item.classList.toggle("is-active", item.dataset.source === sourceType);
+  });
+  document.querySelectorAll(".source-pane").forEach((pane) => {
+    const isActive = pane.dataset.pane === sourceType;
+    pane.classList.toggle("is-active", isActive);
+    pane.hidden = !isActive;
+    pane.style.display = isActive ? "grid" : "none";
+  });
 }
 
 function renderReport() {
@@ -380,14 +392,22 @@ function renderFindings() {
 function renderSourceViewer() {
   const dict = i18n[state.uiLanguage];
   const finding = state.response.scan_result.findings.find((item) => item.id === state.selectedFindingId);
-  if (!finding || !finding.evidence.file) {
+  if (!finding) {
     els.sourceViewer.innerHTML = `<div class="source-empty">${escapeHtml(dict.noSource)}</div>`;
+    return;
+  }
+
+  if (!finding.evidence.file) {
+    els.sourceViewer.innerHTML = renderFindingFallback(finding, dict.noFileLocation);
     return;
   }
 
   const source = state.response.source_files[finding.evidence.file];
   if (!source) {
-    els.sourceViewer.innerHTML = `<div class="source-empty">${escapeHtml(dict.noSource)}</div>`;
+    els.sourceViewer.innerHTML = renderFindingFallback(
+      finding,
+      `${dict.sourceUnavailable} (${finding.evidence.file})`
+    );
     return;
   }
 
@@ -398,8 +418,9 @@ function renderSourceViewer() {
     .map((line, index) => {
       const lineNo = index + 1;
       const highlighted = lineNo >= lineStart && lineNo <= lineEnd;
+      const targeted = lineNo === lineStart;
       return `
-        <div class="code-line ${highlighted ? "is-highlighted" : ""}">
+        <div class="code-line ${highlighted ? "is-highlighted" : ""} ${targeted ? "is-targeted" : ""}" data-line-no="${lineNo}">
           <span class="line-no">${lineNo}</span>
           <span class="line-text">${escapeHtml(line || " ")}</span>
         </div>
@@ -421,7 +442,47 @@ function renderSourceViewer() {
     ${finding.explanation ? `<p><strong>${escapeHtml(dict.explanation)}:</strong> ${escapeHtml(finding.explanation)}</p>` : ""}
     ${finding.remediation ? `<p><strong>${escapeHtml(dict.remediation)}:</strong> ${escapeHtml(finding.remediation)}</p>` : ""}
     ${source.truncated ? `<p class="muted">${escapeHtml(dict.truncated)}</p>` : ""}
-    <div class="source-code">${html}</div>
+    <div class="source-code" id="sourceCodeBlock">${html}</div>
+  `;
+
+  scrollSourceToFinding(lineStart);
+}
+
+function scrollSourceToFinding(lineStart) {
+  const container = document.getElementById("sourceCodeBlock");
+  const targetLine = container?.querySelector(`[data-line-no="${lineStart}"]`);
+  if (!container || !targetLine) return;
+  requestAnimationFrame(() => {
+    const desiredTop = Math.max(
+      0,
+      targetLine.offsetTop - container.clientHeight / 2 + targetLine.clientHeight / 2
+    );
+    container.scrollTo({ top: desiredTop, behavior: "smooth" });
+  });
+}
+
+function renderFindingFallback(finding, message) {
+  const dict = i18n[state.uiLanguage];
+  const snippet = finding.evidence?.snippet;
+  const location = finding.evidence?.file
+    ? `${finding.evidence.file}:${finding.evidence.line_start || "?"}`
+    : "repository";
+  return `
+    <div class="source-header">
+      <div>
+        <strong>${escapeHtml(finding.title)}</strong>
+        <div class="muted">${escapeHtml(location)}</div>
+      </div>
+      <div class="source-meta">
+        <span class="chip">${escapeHtml(finding.severity)}</span>
+        <span class="chip">${escapeHtml(finding.engine)}</span>
+        <span class="chip">${escapeHtml(finding.rule_id)}</span>
+      </div>
+    </div>
+    <p class="muted">${escapeHtml(message)}</p>
+    ${finding.explanation ? `<p><strong>${escapeHtml(dict.explanation)}:</strong> ${escapeHtml(finding.explanation)}</p>` : ""}
+    ${finding.remediation ? `<p><strong>${escapeHtml(dict.remediation)}:</strong> ${escapeHtml(finding.remediation)}</p>` : ""}
+    ${snippet ? `<pre class="code-block"><strong>${escapeHtml(dict.snippet)}:</strong>\n${escapeHtml(snippet)}</pre>` : ""}
   `;
 }
 
@@ -487,4 +548,5 @@ async function syncHealthChip() {
 }
 
 renderLanguage();
+setSourceType(state.sourceType);
 syncHealthChip();

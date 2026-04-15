@@ -16,7 +16,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 def create_app() -> FastAPI:
     app = FastAPI(
         title="SkillLint Web App",
-        version="0.2.0",
+        version="0.2.1",
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",
     )

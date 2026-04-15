@@ -85,7 +85,7 @@ def test_scan_url_endpoint(monkeypatch) -> None:
     sample = AppScanResponse(
         scan_result=ScanResult(
             scan_id="scan-1",
-            tool_version="0.2.0",
+            tool_version="0.2.1",
             target=TargetInfo(raw="https://example.com/skill.zip", normalized_type="url"),
             language="en",
             summary=ScanSummary(finding_count=0),

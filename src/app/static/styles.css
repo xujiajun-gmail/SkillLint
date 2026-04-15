@@ -153,14 +153,6 @@ body {
   gap: 20px;
 }
 
-.source-pane {
-  display: none;
-}
-
-.source-pane.is-active {
-  display: block;
-}
-
 .field {
   display: grid;
   gap: 10px;
@@ -170,16 +162,13 @@ body {
   font-weight: 700;
 }
 
-.option-note-box {
-  align-content: start;
-  padding: 14px 16px;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.56);
+.field.source-pane,
+.source-pane[hidden] {
+  display: none !important;
 }
 
-.option-note-title {
-  font-weight: 700;
+.field.source-pane.is-active {
+  display: grid !important;
 }
 
 input[type="url"],
@@ -444,7 +433,8 @@ th {
 }
 
 .source-viewer {
-  min-height: 460px;
+  display: grid;
+  gap: 12px;
 }
 
 .source-empty {
@@ -470,12 +460,14 @@ th {
   margin: 0;
   padding: 16px;
   overflow: auto;
+  max-height: min(72vh, 920px);
   border-radius: 18px;
   background: #0f1a20;
   color: #e4eef2;
   font-family: "SFMono-Regular", "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 13px;
   line-height: 1.58;
+  scroll-behavior: smooth;
 }
 
 .code-line {
@@ -488,6 +480,11 @@ th {
 .code-line.is-highlighted {
   background: rgba(11, 111, 138, 0.18);
   border-left: 3px solid #4fd0f5;
+}
+
+.code-line.is-targeted {
+  background: rgba(79, 208, 245, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(79, 208, 245, 0.3);
 }
 
 .line-no {
