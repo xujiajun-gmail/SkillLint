@@ -54,6 +54,7 @@ It is intended to produce:
 - rule filtering by `rule_id` and taxonomy
 - target type resolution: directory / zip / URL / git URL
 - workspace normalization
+- input validation for directory / archive / URL before scanning
 - package engine
   - hidden file / archive / binary / symlink / startup artifact checks
   - `package.json` lifecycle scripts
@@ -119,6 +120,7 @@ The web app supports:
 - zip upload
 - directory upload
 - remote URL scan
+- input validation hints and clearer validation-error feedback
 - bilingual UI with auto/manual zh/en switching
 - human-readable report, raw JSON, and Markdown output
 - finding-to-source navigation for flagged files
@@ -178,6 +180,29 @@ llm:
 
 For security, prefer environment variables or CLI secrets over committing API keys.
 Use `--llm-debug` only during prompt debugging; it includes raw LLM responses and snippets in scan metadata.
+
+Input validation defaults:
+
+- directory / extracted archive must look like a skill package
+- by default, scan input must contain a `SKILL.md` entry
+- normalized file count must not exceed `1000`
+- archive path traversal / symlink entries are rejected
+- path depth / path length are bounded
+- single-file and total input size are bounded
+- remote URL downloads are size-limited before scan continues
+
+Related config keys:
+
+```yaml
+inputs:
+  max_archive_size_mb: 100
+  max_input_files: 1000
+  max_single_file_mb: 20
+  max_total_input_mb: 200
+  max_path_depth: 20
+  max_path_length: 240
+  require_skill_entry: true
+```
 
 Profile discovery:
 

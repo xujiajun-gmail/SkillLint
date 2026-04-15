@@ -19,6 +19,16 @@ const i18n = {
     useLlm: "Enable optional LLM semantic review",
     scanButton: "Start scan",
     scanHint: "Results stay in your browser session.",
+    validationTitle: "Input checks",
+    validationArchive1: "The archive must unpack into a skill package with a SKILL.md entry.",
+    validationArchive2: "Unsafe zip paths, symlink entries, over-deep paths, and oversized payloads are rejected.",
+    validationArchive3: "The extracted file count must not exceed 1000.",
+    validationDirectory1: "The selected directory must look like a skill root, or contain a single wrapped skill directory.",
+    validationDirectory2: "The normalized file count must not exceed 1000.",
+    validationDirectory3: "Very large files, deep paths, and oversized directory payloads are rejected.",
+    validationUrl1: "Remote input is downloaded with size limits before scan starts.",
+    validationUrl2: "Downloaded archives and extracted content must still pass the same skill-package checks.",
+    validationUrl3: "Very large downloads, invalid archives, and non-skill content are rejected early.",
     reportTitle: "Analysis report",
     reportHint: "Human-readable report with structured findings and source locations.",
     copyMarkdown: "Copy Markdown",
@@ -60,7 +70,15 @@ const i18n = {
     apiReady: "API ready",
     apiOffline: "API unavailable",
     errorPrefix: "Scan failed:",
-    sourceTypeMissing: "Please provide a valid input for the selected source type."
+    errorTitle: "Input validation failed",
+    sourceTypeMissing: "Please provide a valid input for the selected source type.",
+    errorMissingSkill: "The uploaded content does not look like a skill package. Make sure the actual skill root contains SKILL.md.",
+    errorTooManyFiles: "The uploaded content exceeds the file-count limit. Reduce generated files, caches, or bundled dependencies.",
+    errorTooLarge: "The uploaded content exceeds the size limit. Remove large artifacts or split the package.",
+    errorUnsafeArchive: "The archive contains unsafe or malformed paths. Rebuild the zip from a clean skill directory.",
+    errorInvalidArchive: "The uploaded archive is not a valid zip file.",
+    errorPathDepth: "Some paths are too deep or too long. Flatten the package structure before scanning.",
+    errorRemoteSize: "The remote URL points to content that exceeds the allowed download size."
   },
   zh: {
     eyebrow: "Skill 安全工作台",
@@ -82,6 +100,16 @@ const i18n = {
     useLlm: "启用可选的 LLM 语义复核",
     scanButton: "开始扫描",
     scanHint: "结果只保留在当前浏览器会话中。",
+    validationTitle: "输入校验",
+    validationArchive1: "压缩包解压后必须像一个 skill 包，并包含 SKILL.md 入口。",
+    validationArchive2: "会拒绝不安全 zip 路径、symlink entry、过深路径和超大展开内容。",
+    validationArchive3: "解压后的文件总数不能超过 1000。",
+    validationDirectory1: "所选目录必须像一个 skill 根目录，或只包裹了单个 skill 子目录。",
+    validationDirectory2: "归一化后的文件总数不能超过 1000。",
+    validationDirectory3: "会拒绝超大文件、过深路径和整体体积过大的目录。",
+    validationUrl1: "远程输入会先在大小限制下下载，再进入扫描。",
+    validationUrl2: "下载后的压缩包及解压结果仍需通过同样的 skill 包校验。",
+    validationUrl3: "超大下载、无效压缩包和非 skill 内容会被提前拒绝。",
     reportTitle: "分析报告",
     reportHint: "适合人工阅读的报告，同时保留结构化 finding 与源码定位。",
     copyMarkdown: "复制 Markdown",
@@ -123,7 +151,15 @@ const i18n = {
     apiReady: "API 可用",
     apiOffline: "API 不可用",
     errorPrefix: "扫描失败：",
-    sourceTypeMissing: "请先为当前输入类型提供有效内容。"
+    errorTitle: "输入校验未通过",
+    sourceTypeMissing: "请先为当前输入类型提供有效内容。",
+    errorMissingSkill: "上传内容看起来不像 skill 包。请确认真正的 skill 根目录下包含 SKILL.md。",
+    errorTooManyFiles: "上传内容超过文件数限制。请移除缓存、构建产物或无关依赖文件。",
+    errorTooLarge: "上传内容超过大小限制。请移除大文件或拆分包内容。",
+    errorUnsafeArchive: "压缩包中包含不安全或异常路径。请从干净的 skill 目录重新打包。",
+    errorInvalidArchive: "上传的压缩包不是有效 zip 文件。",
+    errorPathDepth: "部分路径过深或过长。请先扁平化目录结构后再扫描。",
+    errorRemoteSize: "远程 URL 指向的内容超过允许的下载大小。"
   }
 };
 
@@ -156,7 +192,9 @@ const els = {
   markdownView: document.getElementById("markdownView"),
   jsonView: document.getElementById("jsonView"),
   copyMarkdownBtn: document.getElementById("copyMarkdownBtn"),
-  copyJsonBtn: document.getElementById("copyJsonBtn")
+  copyJsonBtn: document.getElementById("copyJsonBtn"),
+  validationTitle: document.getElementById("validationTitle"),
+  validationChecklist: document.getElementById("validationChecklist")
 };
 
 document.querySelectorAll("[data-lang-ui]").forEach((button) => {
@@ -283,6 +321,10 @@ function renderLanguage() {
     button.classList.toggle("is-active", button.dataset.langUi === state.uiLanguage);
   });
   els.reportLanguage.querySelector('option[value="auto"]').textContent = dict.autoOption;
+  if (els.validationTitle) {
+    els.validationTitle.textContent = dict.validationTitle;
+  }
+  renderValidationChecklist();
 }
 
 function setSourceType(sourceType) {
@@ -297,6 +339,19 @@ function setSourceType(sourceType) {
     // 加一层内联 display 控制，避免样式缓存或 class 覆盖导致多个 pane 同时显示。
     pane.style.display = isActive ? "grid" : "none";
   });
+  renderValidationChecklist();
+}
+
+function renderValidationChecklist() {
+  if (!els.validationChecklist) return;
+  const dict = i18n[state.uiLanguage];
+  const itemsByType = {
+    archive: [dict.validationArchive1, dict.validationArchive2, dict.validationArchive3],
+    directory: [dict.validationDirectory1, dict.validationDirectory2, dict.validationDirectory3],
+    url: [dict.validationUrl1, dict.validationUrl2, dict.validationUrl3]
+  };
+  const items = itemsByType[state.sourceType] || [];
+  els.validationChecklist.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
 function renderReport() {
@@ -525,13 +580,72 @@ function setLoading(isLoading) {
 }
 
 function showError(message) {
-  els.errorState.textContent = message;
+  const explanation = explainValidationError(message);
+  const suggestions = explanation.suggestions.length
+    ? `<ul class="error-list">${explanation.suggestions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+    : "";
+  els.errorState.innerHTML = `
+    <h3>${escapeHtml(i18n[state.uiLanguage].errorTitle)}</h3>
+    <p>${escapeHtml(message)}</p>
+    ${explanation.summary ? `<p>${escapeHtml(explanation.summary)}</p>` : ""}
+    ${suggestions}
+  `;
   els.errorState.classList.remove("hidden");
 }
 
 function clearError() {
   els.errorState.classList.add("hidden");
-  els.errorState.textContent = "";
+  els.errorState.innerHTML = "";
+}
+
+function explainValidationError(message) {
+  const dict = i18n[state.uiLanguage];
+  const lowered = String(message).toLowerCase();
+  if (
+    lowered.includes("no skill.md") ||
+    lowered.includes("root skill.md is missing") ||
+    lowered.includes("not a skill")
+  ) {
+    return {
+      summary: dict.errorMissingSkill,
+      suggestions: [dict.validationDirectory1, dict.validationArchive1, dict.validationUrl2]
+    };
+  }
+  if (lowered.includes("too many files") || lowered.includes("maximum number of files")) {
+    return {
+      summary: dict.errorTooManyFiles,
+      suggestions: [dict.validationDirectory2, dict.validationArchive3]
+    };
+  }
+  if (lowered.includes("unsafe path traversal") || lowered.includes("symlink entry")) {
+    return {
+      summary: dict.errorUnsafeArchive,
+      suggestions: [dict.validationArchive2]
+    };
+  }
+  if (lowered.includes("invalid zip archive")) {
+    return {
+      summary: dict.errorInvalidArchive,
+      suggestions: [dict.validationArchive1]
+    };
+  }
+  if (lowered.includes("too deep") || lowered.includes("too long")) {
+    return {
+      summary: dict.errorPathDepth,
+      suggestions: [dict.validationDirectory3, dict.validationArchive2]
+    };
+  }
+  if (
+    lowered.includes("too large") ||
+    lowered.includes("file is too large") ||
+    lowered.includes("bytes >")
+  ) {
+    return {
+      summary: lowered.includes("remote") ? dict.errorRemoteSize : dict.errorTooLarge,
+      suggestions: [dict.validationDirectory3, dict.validationArchive2, dict.validationUrl1]
+    };
+  }
+  return { summary: "", suggestions: [] };
 }
 
 function toast(message) {

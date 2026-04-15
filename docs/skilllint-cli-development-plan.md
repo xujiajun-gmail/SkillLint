@@ -28,6 +28,12 @@
   - 本地 zip
   - 远程 URL
   - git repo URL
+- 输入校验：
+  - skill 入口校验（默认要求 `SKILL.md`）
+  - 文件数限制（默认 1000）
+  - 单文件 / 总体积限制
+  - 路径深度 / 路径长度限制
+  - zip 路径穿越 / symlink entry 拒绝
 - 输出：
   - JSON
   - Markdown
@@ -201,6 +207,14 @@ skilllint scan <target> \
 
 ### 4.1 Normalize First
 不论输入是 zip、目录还是 URL，先转换成统一的“工作区 skill 包”。
+
+### 4.1.1 Validate Before Deep Scan
+在进入真正检测引擎前，先做统一输入校验，避免：
+
+- 用户误选父目录或非 skill 内容
+- zip slip / 异常压缩路径
+- 超大包 / 超深目录拖垮扫描
+- Web 上传时把缓存、依赖、构建产物整包带进来
 
 ### 4.2 Engine Separation
 检测引擎彼此独立，统一输出 finding，再交给 taxonomy mapper 和 report renderer。

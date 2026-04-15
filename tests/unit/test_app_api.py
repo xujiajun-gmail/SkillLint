@@ -20,6 +20,7 @@ def test_app_root_and_health() -> None:
 
     assert root.status_code == 200
     assert "SkillLint Web" in root.text
+    assert "validationChecklist" in root.text
     assert health.status_code == 200
     assert health.json() == {"status": "ok"}
 

@@ -171,6 +171,29 @@ body {
   display: grid !important;
 }
 
+.validation-note {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.validation-note h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.validation-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.validation-list li + li {
+  margin-top: 6px;
+}
+
 input[type="url"],
 input[type="file"],
 select {
@@ -259,6 +282,23 @@ select {
 .error-state {
   color: var(--danger);
   border-color: rgba(179, 63, 40, 0.25);
+  text-align: left;
+}
+
+.error-state h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.error-state p {
+  margin: 0 0 10px;
+}
+
+.error-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--danger);
+  line-height: 1.55;
 }
 
 .spinner {
