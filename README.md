@@ -3,6 +3,7 @@
 SkillLint is a security scanner for agent skills.
 
 SkillLint now ships a working CLI baseline with multi-engine scanning, JSON/Markdown/SARIF output, golden-subset evaluation, and an initial corpus of example skills.
+It also ships a lightweight web app and REST API for interactive scan workflows.
 
 ## Goals
 
@@ -44,6 +45,7 @@ It is intended to produce:
 ### Implemented in the current baseline
 - Python package scaffold
 - `skilllint scan <target>` CLI entrypoint
+- `skilllint-web` web app + REST API for scan workflows
 - `skilllint profiles`
 - `skilllint evaluate-golden`
 - built-in scan profiles: `balanced`, `strict`, `marketplace-review`, `ci`
@@ -98,6 +100,33 @@ You can also scan a zip or URL:
 skilllint scan ./skill.zip
 skilllint scan https://example.com/skill.zip
 skilllint scan https://github.com/openai/skills
+```
+
+Run the web app locally:
+
+```bash
+pip install -e .[dev]
+skilllint-web
+```
+
+Then open `http://127.0.0.1:8000`.
+
+The web app supports:
+- zip upload
+- directory upload
+- remote URL scan
+- bilingual UI with auto/manual zh/en switching
+- human-readable report, raw JSON, and Markdown output
+- finding-to-source navigation for flagged files
+
+REST API endpoints:
+
+```text
+GET  /api/health
+POST /api/scan/url
+POST /api/scan/archive
+POST /api/scan/directory
+GET  /api/docs
 ```
 
 ## CLI

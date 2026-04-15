@@ -245,7 +245,7 @@ def _render_score_drivers(result: ScanResult) -> list[str]:
 
 
 
-def render_markdown(result: ScanResult, path: str | Path) -> None:
+def build_markdown(result: ScanResult) -> str:
     """把统一 ScanResult 渲染成人类可读的 Markdown 报告。"""
     correlation_lines = _render_correlation_hits(result)
     score_driver_lines = _render_score_drivers(result)
@@ -314,4 +314,8 @@ def render_markdown(result: ScanResult, path: str | Path) -> None:
         if score_driver_lines:
             content.extend(["", "## Score Drivers", "", *score_driver_lines])
         content.extend(["", "## Detailed Findings", "", _render_findings_en(result.findings)])
-    Path(path).write_text("\n".join(content).strip() + "\n", encoding="utf-8")
+    return "\n".join(content).strip() + "\n"
+
+
+def render_markdown(result: ScanResult, path: str | Path) -> None:
+    Path(path).write_text(build_markdown(result), encoding="utf-8")

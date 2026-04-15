@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "skilllint"
-version = "0.1.2"
+version = "0.2.0"
 description = "Security scanner for agent skills"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -28,6 +28,9 @@ dependencies = [
   "pyyaml>=6.0.2",
   "httpx>=0.28.0",
   "jinja2>=3.1.6",
+  "fastapi>=0.116.0",
+  "uvicorn>=0.35.0",
+  "python-multipart>=0.0.20",
 ]
 
 [project.optional-dependencies]
@@ -41,12 +44,16 @@ dev = [
 
 [project.scripts]
 skilllint = "skilllint.cli:app"
+skilllint-web = "app.main:run"
 
 [tool.hatch.build]
-include = ["src/skilllint/**/*.yaml"]
+include = [
+  "src/skilllint/**/*.yaml",
+  "src/app/static/**/*",
+]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/skilllint"]
+packages = ["src/skilllint", "src/app"]
 
 [tool.ruff]
 line-length = 100
