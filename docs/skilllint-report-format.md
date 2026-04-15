@@ -159,6 +159,7 @@ skilllint scan ./skill --format all
 - `rule_catalog`
 - `rule_filters`
 - `correlation_hits`
+- `risk_flows`
 - `score_breakdown`
 - `semantic_llm_status`
 
@@ -167,6 +168,34 @@ skilllint scan ./skill --format all
 - `semantic_llm_debug`
 
 > 注意：`semantic_llm_debug` 会包含原始 LLM 返回与片段内容，只应在调试时启用。
+
+### `risk_flows`
+
+`metadata.risk_flows` 是由 findings 后处理归纳出的攻击链/风险链视图。
+它不会替代 `findings`，而是通过 `evidence_refs` 引用已有 finding，便于前端和外部系统展示“源 → 汇”的路径。
+
+示例：
+
+```json
+{
+  "id": "flow.slt-b04.instructions-to-persistent-memory",
+  "title": "Instructions or tool output may persist into long-lived memory",
+  "primary_taxonomy": "SLT-B04",
+  "severity": "high",
+  "file": "SKILL.md",
+  "triggered_rule_ids": [
+    "SEMANTIC_EMBEDDED_INSTRUCTION_FOLLOWING",
+    "SEMANTIC_MEMORY_PERSISTENCE"
+  ],
+  "evidence_refs": ["...finding id..."],
+  "path_labels": ["runtime/tool content", "persistent memory file"],
+  "finding_count": 2
+}
+```
+
+详细说明见：
+
+- `docs/skilllint-risk-flows.md`
 
 ---
 

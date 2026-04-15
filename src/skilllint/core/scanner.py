@@ -7,6 +7,7 @@ from skilllint.engines.dataflow_engine import DataflowEngine
 from skilllint.engines.package_engine import PackageEngine
 from skilllint.engines.regex_engine import RegexEngine
 from skilllint.engines.semantic_engine import SemanticEngine
+from skilllint.flows import build_risk_flows
 from skilllint.models import Finding, ScanResult, TargetInfo
 from skilllint.rules.repository import get_rule_repository
 from skilllint.rules.selector import RuleSelector
@@ -48,6 +49,8 @@ class SkillScanner:
             language = self._resolve_language(workspace)
             summary = build_summary(findings, correlation_outcome.hits)
             score_breakdown = build_score_breakdown(findings, correlation_outcome.hits)
+            # risk_flows 是对离散 findings 的链路化解释，便于 API/UI 展示“源 -> 汇”的攻击路径。
+            risk_flows = build_risk_flows(findings)
             repository = get_rule_repository()
             return ScanResult(
                 scan_id=workspace.scan_id,
@@ -71,6 +74,7 @@ class SkillScanner:
                     "correlation_hits": [
                         hit.model_dump() for hit in correlation_outcome.hits
                     ],
+                    "risk_flows": risk_flows,
                     "score_breakdown": score_breakdown,
                     **engine_meta,
                 },

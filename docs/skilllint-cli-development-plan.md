@@ -42,6 +42,7 @@
   - dataflow
 - golden labeled subset 与评估命令
 - correlation scoring / aggregate score
+- structured risk flows / attack-chain metadata
 - GitHub Actions / manifest / Dockerfile 风险检测
 - Python / shell / JS/TS dataflow 检测
 
@@ -163,6 +164,7 @@ skilllint scan <target> \
 - `report.md`：人类可读
 - `result.sarif.json`：SARIF 2.1.0
 - 终端 summary：简洁概览
+- `metadata.risk_flows`：面向 API / Web UI / explain 的攻击链视图
 
 ### 3.3 检测引擎（第一批）
 
@@ -189,7 +191,9 @@ skilllint scan <target> \
    - 首批聚焦 Python / Shell（现已扩展到 JS/TS）
    - source → sink：
      - env/file/history -> network
+     - secret -> log/stdout
      - user input -> exec/subprocess/eval
+     - tainted parameter -> destructive delete target
 
 ---
 

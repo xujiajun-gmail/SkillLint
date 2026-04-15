@@ -33,6 +33,8 @@ It is intended to produce:
 - Example baseline snapshot: `docs/skilllint-example-baseline.md`
 - Golden labeled subset and evaluation: `docs/skilllint-golden-evaluation.md`
 - Correlation scoring: `docs/skilllint-correlation-scoring.md`
+- Risk flows / attack-chain metadata: `docs/skilllint-risk-flows.md`
+- skill-safe fixture coverage report: `docs/skilllint-skill-safe-coverage-report.md`
 - False-positive triage round 1: `docs/skilllint-fp-triage-round1.md`
 - False-positive triage round 2: `docs/skilllint-fp-triage-round2.md`
 - False-positive triage round 3: `docs/skilllint-fp-triage-round3.md`
@@ -58,6 +60,7 @@ It is intended to produce:
   - remote / VCS dependency detection in `package.json`, `requirements*.txt`, `pyproject.toml`
   - GitHub Actions trigger / permissions / unpinned action checks
   - Dockerfile remote bootstrap checks
+  - `skill.json` and `.codex-plugin/plugin.json` permission / endpoint / hook / identity checks
 - regex engine
 - semantic engine (local heuristics + optional LLM review)
 - dataflow engine (Python + shell + JS/TS coverage, opt-in or via profile)
@@ -66,6 +69,7 @@ It is intended to produce:
 - golden labeled subset for regression evaluation
 - precision/recall-style rule and taxonomy evaluation
 - aggregate correlation scoring in scan summaries
+- structured `metadata.risk_flows` for attack-chain / source-to-sink style API and UI consumption
 - JSON output
 - Markdown report with auto Chinese or English selection
 - SARIF 2.1.0 output
@@ -75,11 +79,11 @@ It is intended to produce:
 
 - Engines: `package`, `regex`, `semantic`, `dataflow`
 - Structured rules:
-  - regex: 18
-  - package: 15
-  - semantic: 11
-  - dataflow: 6
-  - total: 50
+  - regex: 21
+  - package: 25
+  - semantic: 12
+  - dataflow: 8
+  - total: 66
 
 ### Not implemented yet
 - richer LLM semantic workflows (multi-pass triage / consensus / budget policies)
@@ -226,13 +230,14 @@ Current package/dataflow coverage already includes:
 
 - package / manifest:
   - `SKILL.md` structure checks
+  - `skill.json` / `.codex-plugin/plugin.json` risky permissions, startup hooks, local/private/metadata endpoints, floating references, identity mismatch, and underdeclared behavior
   - lifecycle scripts
   - remote dependencies
   - CI workflow risk
   - Dockerfile bootstrap risk
 - dataflow:
-  - Python secret → network / input → exec
-  - shell secret → network / input → exec
+  - Python secret → network / secret → log / input → exec
+  - shell secret → network / input → exec / tainted delete target
   - JS/TS secret → network / input → exec
 
 ## Rule catalog
@@ -256,7 +261,16 @@ SkillLint currently supports:
 - Markdown
 - SARIF 2.1.0
 
-Scan outputs now also include correlation hits and score-breakdown metadata for explainability.
+Scan outputs now also include correlation hits, score-breakdown metadata, and `metadata.risk_flows` for explainability.
+
+Example risk-flow IDs include:
+
+- `flow.slt-b01.secret-to-egress`
+- `flow.slt-e01.secret-to-log`
+- `flow.slt-a03.external-instructions-to-context`
+- `flow.slt-b04.instructions-to-persistent-memory`
+- `flow.slt-b02.tainted-delete-target`
+- `flow.slt-c04.workspace-policy-poisoning`
 
 ### JSON summary highlights
 
