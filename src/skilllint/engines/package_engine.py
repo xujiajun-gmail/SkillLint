@@ -15,7 +15,7 @@ from skilllint.engines.base import Engine
 from skilllint.models import Evidence, Finding
 from skilllint.rules.repository import build_finding, get_rule_repository
 from skilllint.rules.selector import RuleSelector
-from skilllint.utils.files import IGNORED_DIRS, is_probably_binary
+from skilllint.utils.files import IGNORED_DIRS, is_ignored_noise_artifact, is_probably_binary
 
 SAFE_HIDDEN_NAMES = {".gitignore", ".gitattributes", ".editorconfig", ".prettierrc", ".eslintrc", ".npmrc"}
 ARCHIVE_EXTS = {".zip", ".tar", ".gz", ".7z", ".jar"}
@@ -71,9 +71,11 @@ class PackageEngine(Engine):
                     findings.append(finding)
 
         for path in workspace.normalized_dir.rglob("*"):
-            rel = workspace.relpath(path)
             if any(part in IGNORED_DIRS for part in path.parts):
                 continue
+            if is_ignored_noise_artifact(path):
+                continue
+            rel = workspace.relpath(path)
             if path.is_symlink():
                 # symlink 是需要显式暴露的风险信号，因此不沿链接继续扫描目标内容。
                 finding = self._finding(
