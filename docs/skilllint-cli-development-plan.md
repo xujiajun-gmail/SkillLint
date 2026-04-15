@@ -34,6 +34,7 @@
   - 单文件 / 总体积限制
   - 路径深度 / 路径长度限制
   - zip 路径穿越 / symlink entry 拒绝
+  - 远程 URL 的不安全 host / 凭证 / 重定向限制
 - 输出：
   - JSON
   - Markdown

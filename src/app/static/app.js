@@ -78,7 +78,9 @@ const i18n = {
     errorUnsafeArchive: "The archive contains unsafe or malformed paths. Rebuild the zip from a clean skill directory.",
     errorInvalidArchive: "The uploaded archive is not a valid zip file.",
     errorPathDepth: "Some paths are too deep or too long. Flatten the package structure before scanning.",
-    errorRemoteSize: "The remote URL points to content that exceeds the allowed download size."
+    errorRemoteSize: "The remote URL points to content that exceeds the allowed download size.",
+    errorRemoteHost: "The remote URL host is not allowed for server-side scanning.",
+    errorRemoteCredentials: "Remote URLs must not contain embedded usernames or passwords."
   },
   zh: {
     eyebrow: "Skill 安全工作台",
@@ -159,7 +161,9 @@ const i18n = {
     errorUnsafeArchive: "压缩包中包含不安全或异常路径。请从干净的 skill 目录重新打包。",
     errorInvalidArchive: "上传的压缩包不是有效 zip 文件。",
     errorPathDepth: "部分路径过深或过长。请先扁平化目录结构后再扫描。",
-    errorRemoteSize: "远程 URL 指向的内容超过允许的下载大小。"
+    errorRemoteSize: "远程 URL 指向的内容超过允许的下载大小。",
+    errorRemoteHost: "远程 URL 的主机不允许由服务端扫描访问。",
+    errorRemoteCredentials: "远程 URL 不能包含内嵌用户名或密码。"
   }
 };
 
@@ -245,7 +249,8 @@ els.scanForm.addEventListener("submit", async (event) => {
     state.selectedFindingId = response.scan_result.findings[0]?.id ?? null;
     renderReport();
   } catch (error) {
-    showError(`${i18n[state.uiLanguage].errorPrefix} ${error.message}`);
+    error.message = `${i18n[state.uiLanguage].errorPrefix} ${error.message}`;
+    showError(error);
   } finally {
     setLoading(false);
   }
@@ -305,7 +310,14 @@ async function submitScan() {
 async function parseApiResponse(response) {
   const payload = await response.json();
   if (!response.ok) {
-    throw new Error(payload.detail || response.statusText);
+    const detail = payload.detail;
+    if (detail && typeof detail === "object") {
+      const error = new Error(detail.message || response.statusText);
+      error.code = detail.code || "bad_request";
+      error.metadata = detail.metadata || {};
+      throw error;
+    }
+    throw new Error(detail || response.statusText);
   }
   return payload;
 }
@@ -579,14 +591,15 @@ function setLoading(isLoading) {
   });
 }
 
-function showError(message) {
-  const explanation = explainValidationError(message);
+function showError(errorLike) {
+  const error = typeof errorLike === "string" ? { message: errorLike } : errorLike;
+  const explanation = explainValidationError(error);
   const suggestions = explanation.suggestions.length
     ? `<ul class="error-list">${explanation.suggestions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
     : "";
   els.errorState.innerHTML = `
     <h3>${escapeHtml(i18n[state.uiLanguage].errorTitle)}</h3>
-    <p>${escapeHtml(message)}</p>
+    <p>${escapeHtml(error.message || String(errorLike))}</p>
     ${explanation.summary ? `<p>${escapeHtml(explanation.summary)}</p>` : ""}
     ${suggestions}
   `;
@@ -598,9 +611,73 @@ function clearError() {
   els.errorState.innerHTML = "";
 }
 
-function explainValidationError(message) {
+function explainValidationError(error) {
   const dict = i18n[state.uiLanguage];
-  const lowered = String(message).toLowerCase();
+  const code = error.code || "";
+  const lowered = String(error.message || error).toLowerCase();
+  const byCode = {
+    missing_skill_entry: {
+      summary: dict.errorMissingSkill,
+      suggestions: [dict.validationDirectory1, dict.validationArchive1, dict.validationUrl2]
+    },
+    missing_root_skill_entry: {
+      summary: dict.errorMissingSkill,
+      suggestions: [dict.validationDirectory1, dict.validationArchive1, dict.validationUrl2]
+    },
+    too_many_files: {
+      summary: dict.errorTooManyFiles,
+      suggestions: [dict.validationDirectory2, dict.validationArchive3]
+    },
+    archive_symlink_entry: {
+      summary: dict.errorUnsafeArchive,
+      suggestions: [dict.validationArchive2]
+    },
+    unsafe_archive_path: {
+      summary: dict.errorUnsafeArchive,
+      suggestions: [dict.validationArchive2]
+    },
+    invalid_archive: {
+      summary: dict.errorInvalidArchive,
+      suggestions: [dict.validationArchive1]
+    },
+    path_too_deep: {
+      summary: dict.errorPathDepth,
+      suggestions: [dict.validationDirectory3, dict.validationArchive2]
+    },
+    path_too_long: {
+      summary: dict.errorPathDepth,
+      suggestions: [dict.validationDirectory3, dict.validationArchive2]
+    },
+    file_too_large: {
+      summary: dict.errorTooLarge,
+      suggestions: [dict.validationDirectory3, dict.validationArchive2, dict.validationUrl1]
+    },
+    input_too_large: {
+      summary: dict.errorTooLarge,
+      suggestions: [dict.validationDirectory3, dict.validationArchive2, dict.validationUrl1]
+    },
+    archive_too_large: {
+      summary: dict.errorTooLarge,
+      suggestions: [dict.validationArchive2]
+    },
+    remote_too_large: {
+      summary: dict.errorRemoteSize,
+      suggestions: [dict.validationUrl1, dict.validationUrl3]
+    },
+    remote_credentials_not_allowed: {
+      summary: dict.errorRemoteCredentials,
+      suggestions: [dict.validationUrl1]
+    },
+    unsafe_remote_host: {
+      summary: dict.errorRemoteHost,
+      suggestions: [dict.validationUrl1]
+    },
+    too_many_redirects: {
+      summary: dict.errorRemoteSize,
+      suggestions: [dict.validationUrl1, dict.validationUrl3]
+    }
+  };
+  if (code && byCode[code]) return byCode[code];
   if (
     lowered.includes("no skill.md") ||
     lowered.includes("root skill.md is missing") ||

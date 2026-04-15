@@ -127,7 +127,9 @@ def test_scan_archive_endpoint_rejects_non_skill_archive(tmp_path: Path) -> None
         )
 
     assert response.status_code == 400
-    assert "SKILL.md" in response.json()["detail"]
+    detail = response.json()["detail"]
+    assert detail["code"] == "missing_skill_entry"
+    assert "SKILL.md" in detail["message"]
 
 
 def test_scan_directory_endpoint_rejects_too_many_files() -> None:
@@ -149,4 +151,23 @@ def test_scan_directory_endpoint_rejects_too_many_files() -> None:
     )
 
     assert response.status_code == 400
-    assert "1000" in response.json()["detail"]
+    detail = response.json()["detail"]
+    # Starlette/FastAPI may reject very large multipart uploads before our service
+    # receives them. That is still acceptable early input validation for the web API.
+    assert "1000" in detail
+
+
+def test_scan_url_endpoint_rejects_unsafe_remote_host() -> None:
+    response = client.post(
+        "/api/scan/url",
+        json={
+            "url": "http://127.0.0.1:8000/skill.zip",
+            "language": "en",
+            "use_dataflow": True,
+            "use_llm": False,
+        },
+    )
+
+    assert response.status_code == 400
+    detail = response.json()["detail"]
+    assert detail["code"] == "unsafe_remote_host"

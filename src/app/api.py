@@ -8,6 +8,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.schemas import AppScanResponse, HealthResponse, ScanOptions, URLScanRequest
 from app.service import ScanService, parse_relative_paths
+from skilllint.core.input_validation import InputValidationError
 
 router = APIRouter()
 service = ScanService()
@@ -25,7 +26,7 @@ def scan_url(payload: URLScanRequest) -> AppScanResponse:
         # API 层不直接编排扫描，只做参数验证与 HTTP 错误映射。
         return service.scan_from_url(str(payload.url), ScanOptions.model_validate(payload.model_dump()))
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise _bad_request(exc) from exc
 
 
 @router.post("/scan/archive", response_model=AppScanResponse)
@@ -50,7 +51,7 @@ async def scan_archive(
             ),
         )
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise _bad_request(exc) from exc
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
 
@@ -80,7 +81,20 @@ async def scan_directory(
             ),
         )
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise _bad_request(exc) from exc
     finally:
         if temp_dir is not None:
             shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def _bad_request(exc: ValueError) -> HTTPException:
+    if isinstance(exc, InputValidationError):
+        return HTTPException(status_code=400, detail=exc.to_api_detail())
+    return HTTPException(
+        status_code=400,
+        detail={
+            "code": "bad_request",
+            "message": str(exc),
+            "metadata": {},
+        },
+    )

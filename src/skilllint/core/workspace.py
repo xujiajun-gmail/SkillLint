@@ -4,19 +4,20 @@ import shutil
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from uuid import uuid4
 
 import httpx
 
 from skilllint.config import SkillLintConfig
 from skilllint.core.input_validation import (
-    InputValidationError,
     safe_archive_path,
     select_skill_root,
     validate_local_directory_source,
+    validate_remote_source_url,
     validate_skill_tree,
     validate_zip_members,
+    validation_error,
 )
 from skilllint.models import TargetInfo, WorkspaceInfo
 from skilllint.utils.files import iter_files
@@ -132,36 +133,66 @@ def _extract_zip(zip_path: Path, dst: Path, config: SkillLintConfig) -> None:
                 with zf.open(info) as src, target.open("wb") as out:
                     shutil.copyfileobj(src, out)
     except zipfile.BadZipFile as exc:
-        raise InputValidationError(f"Invalid zip archive: {zip_path}") from exc
+        raise validation_error("invalid_archive", f"Invalid zip archive: {zip_path}") from exc
 
 
 def _download_url(url: str, root_dir: Path, config: SkillLintConfig) -> Path:
     # 下载逻辑故意保持流式写盘，避免把大文件整体读入内存。
+    validate_remote_source_url(url)
     parsed = urlparse(url)
     filename = Path(parsed.path).name or "downloaded-skill"
     download_path = root_dir / filename
     timeout = httpx.Timeout(config.inputs.download_timeout_seconds)
     max_bytes = config.inputs.max_archive_size_mb * 1024 * 1024
-    with httpx.stream("GET", url, timeout=timeout, follow_redirects=True) as response:
-        response.raise_for_status()
-        header_size = response.headers.get("content-length")
-        if header_size is not None:
-            try:
-                if int(header_size) > max_bytes:
-                    raise InputValidationError(
-                        f"Remote input is too large: {int(header_size)} bytes > {max_bytes} bytes."
-                    )
-            except ValueError:
-                pass
-        with download_path.open("wb") as f:
-            total = 0
-            for chunk in response.iter_bytes():
-                total += len(chunk)
-                if total > max_bytes:
-                    raise InputValidationError(
-                        f"Remote input is too large: {total} bytes > {max_bytes} bytes."
-                    )
-                f.write(chunk)
+    with httpx.Client(timeout=timeout, follow_redirects=False) as client:
+        current_url = url
+        for redirect_index in range(config.inputs.max_redirects + 1):
+            with client.stream("GET", current_url) as response:
+                if response.is_redirect:
+                    location = response.headers.get("location")
+                    if not location:
+                        raise validation_error("invalid_remote_redirect", "Remote URL returned a redirect without location.")
+                    if redirect_index >= config.inputs.max_redirects:
+                        raise validation_error(
+                            "too_many_redirects",
+                            f"Remote URL exceeded redirect limit: {config.inputs.max_redirects}.",
+                            max_redirects=config.inputs.max_redirects,
+                        )
+                    next_url = urljoin(current_url, location)
+                    validate_remote_source_url(next_url)
+                    current_url = next_url
+                    continue
+                response.raise_for_status()
+                header_size = response.headers.get("content-length")
+                if header_size is not None:
+                    try:
+                        if int(header_size) > max_bytes:
+                            raise validation_error(
+                                "remote_too_large",
+                                f"Remote input is too large: {int(header_size)} bytes > {max_bytes} bytes.",
+                                remote_size=int(header_size),
+                                max_archive_size_bytes=max_bytes,
+                            )
+                    except ValueError:
+                        pass
+                with download_path.open("wb") as f:
+                    total = 0
+                    for chunk in response.iter_bytes():
+                        total += len(chunk)
+                        if total > max_bytes:
+                            raise validation_error(
+                                "remote_too_large",
+                                f"Remote input is too large: {total} bytes > {max_bytes} bytes.",
+                                remote_size=total,
+                                max_archive_size_bytes=max_bytes,
+                            )
+                        f.write(chunk)
+                return download_path
+        raise validation_error(
+            "too_many_redirects",
+            f"Remote URL exceeded redirect limit: {config.inputs.max_redirects}.",
+            max_redirects=config.inputs.max_redirects,
+        )
     return download_path
 
 
@@ -185,6 +216,11 @@ def _validate_local_archive_size(path: Path, config: SkillLintConfig) -> None:
     try:
         size = path.stat().st_size
     except OSError as exc:  # pragma: no cover
-        raise InputValidationError(f"Unable to inspect archive: {path}") from exc
+        raise validation_error("archive_inspection_failed", f"Unable to inspect archive: {path}") from exc
     if size > max_bytes:
-        raise InputValidationError(f"Archive is too large: {size} bytes > {max_bytes} bytes.")
+        raise validation_error(
+            "archive_too_large",
+            f"Archive is too large: {size} bytes > {max_bytes} bytes.",
+            archive_size=size,
+            max_archive_size_bytes=max_bytes,
+        )

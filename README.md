@@ -35,6 +35,7 @@ It is intended to produce:
 - Correlation scoring: `docs/skilllint-correlation-scoring.md`
 - Risk flows / attack-chain metadata: `docs/skilllint-risk-flows.md`
 - skill-safe fixture coverage report: `docs/skilllint-skill-safe-coverage-report.md`
+- Input validation model: `docs/skilllint-input-validation.md`
 - False-positive triage round 1: `docs/skilllint-fp-triage-round1.md`
 - False-positive triage round 2: `docs/skilllint-fp-triage-round2.md`
 - False-positive triage round 3: `docs/skilllint-fp-triage-round3.md`
@@ -190,18 +191,32 @@ Input validation defaults:
 - path depth / path length are bounded
 - single-file and total input size are bounded
 - remote URL downloads are size-limited before scan continues
+- remote URL scanning rejects unsafe local/private/metadata hosts and embedded URL credentials
 
 Related config keys:
 
 ```yaml
 inputs:
   max_archive_size_mb: 100
+  max_redirects: 5
   max_input_files: 1000
   max_single_file_mb: 20
   max_total_input_mb: 200
   max_path_depth: 20
   max_path_length: 240
   require_skill_entry: true
+```
+
+Web/API validation failures return structured error details when the request reaches SkillLint validation:
+
+```json
+{
+  "detail": {
+    "code": "missing_skill_entry",
+    "message": "Input is not a skill package: no SKILL.md was found.",
+    "metadata": {}
+  }
+}
 ```
 
 Profile discovery:

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from skilllint.config import SkillLintConfig
-from skilllint.core.input_validation import InputValidationError
+from skilllint.core.input_validation import InputValidationError, validate_remote_source_url
 from skilllint.core.scanner import SkillScanner
 from skilllint.core.workspace import cleanup_workspace, prepare_workspace
 from skilllint.inputs.resolver import resolve_target
@@ -75,3 +75,15 @@ def test_scanner_rejects_archive_with_too_many_files(tmp_path: Path) -> None:
 
     with pytest.raises(InputValidationError, match="too many files"):
         SkillScanner(SkillLintConfig()).scan(resolve_target(str(archive)))
+
+
+def test_validate_remote_source_url_rejects_localhost_ip() -> None:
+    with pytest.raises(InputValidationError) as exc_info:
+        validate_remote_source_url("http://127.0.0.1:8000/skill.zip")
+    assert exc_info.value.code == "unsafe_remote_host"
+
+
+def test_validate_remote_source_url_rejects_embedded_credentials() -> None:
+    with pytest.raises(InputValidationError) as exc_info:
+        validate_remote_source_url("https://user:pass@example.com/skill.zip")
+    assert exc_info.value.code == "remote_credentials_not_allowed"

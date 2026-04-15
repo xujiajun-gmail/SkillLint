@@ -81,6 +81,7 @@ class InputsConfig(BaseModel):
     allow_remote: bool = True
     download_timeout_seconds: int = 60
     max_archive_size_mb: int = 100
+    max_redirects: int = 5
     max_input_files: int = 1000
     max_single_file_mb: int = 20
     max_total_input_mb: int = 200
