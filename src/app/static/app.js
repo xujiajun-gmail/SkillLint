@@ -176,6 +176,15 @@ const state = {
   selectedFindingId: null
 };
 
+const INPUT_LIMITS = {
+  maxArchiveBytes: 100 * 1024 * 1024,
+  maxInputFiles: 1000,
+  maxSingleFileBytes: 20 * 1024 * 1024,
+  maxTotalInputBytes: 200 * 1024 * 1024,
+  maxPathDepth: 20,
+  maxPathLength: 240
+};
+
 const els = {
   healthChip: document.getElementById("healthChip"),
   scanForm: document.getElementById("scanForm"),
@@ -270,6 +279,7 @@ async function submitScan() {
     if (!els.urlInput.value.trim()) {
       throw new Error(i18n[state.uiLanguage].sourceTypeMissing);
     }
+    validateUrlBeforeSubmit(els.urlInput.value.trim());
     const response = await fetch("/api/scan/url", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -283,6 +293,7 @@ async function submitScan() {
     if (!file) {
       throw new Error(i18n[state.uiLanguage].sourceTypeMissing);
     }
+    validateArchiveBeforeSubmit(file);
     const form = new FormData();
     form.append("file", file);
     Object.entries(options).forEach(([key, value]) => form.append(key, String(value)));
@@ -294,6 +305,7 @@ async function submitScan() {
   if (!files.length) {
     throw new Error(i18n[state.uiLanguage].sourceTypeMissing);
   }
+  validateDirectoryBeforeSubmit(files);
   const form = new FormData();
   const relativePaths = [];
   files.forEach((file) => {
@@ -305,6 +317,138 @@ async function submitScan() {
   Object.entries(options).forEach(([key, value]) => form.append(key, String(value)));
   const response = await fetch("/api/scan/directory", { method: "POST", body: form });
   return parseApiResponse(response);
+}
+
+function validateArchiveBeforeSubmit(file) {
+  const name = file.name || "";
+  if (!name.toLowerCase().endsWith(".zip")) {
+    throw makeValidationError("invalid_archive", i18n[state.uiLanguage].errorInvalidArchive);
+  }
+  if (file.size > INPUT_LIMITS.maxArchiveBytes) {
+    throw makeValidationError(
+      "archive_too_large",
+      `${i18n[state.uiLanguage].errorTooLarge} (${formatBytes(file.size)} > ${formatBytes(INPUT_LIMITS.maxArchiveBytes)})`
+    );
+  }
+}
+
+function validateDirectoryBeforeSubmit(files) {
+  if (files.length > INPUT_LIMITS.maxInputFiles) {
+    throw makeValidationError(
+      "too_many_files",
+      `${i18n[state.uiLanguage].errorTooManyFiles} (${files.length} > ${INPUT_LIMITS.maxInputFiles})`,
+      { file_count: files.length, max_input_files: INPUT_LIMITS.maxInputFiles }
+    );
+  }
+
+  let totalBytes = 0;
+  let hasSkillEntry = false;
+  for (const file of files) {
+    const rel = normalizeClientPath(file.webkitRelativePath || file.name);
+    const parts = rel.split("/").filter(Boolean);
+    if (parts.at(-1) === "SKILL.md") {
+      hasSkillEntry = true;
+    }
+    if (rel.length > INPUT_LIMITS.maxPathLength) {
+      throw makeValidationError("path_too_long", `${i18n[state.uiLanguage].errorPathDepth} (${rel.length} > ${INPUT_LIMITS.maxPathLength})`, {
+        path: rel,
+        path_length: rel.length,
+        max_path_length: INPUT_LIMITS.maxPathLength
+      });
+    }
+    if (parts.length > INPUT_LIMITS.maxPathDepth) {
+      throw makeValidationError("path_too_deep", `${i18n[state.uiLanguage].errorPathDepth} (${parts.length} > ${INPUT_LIMITS.maxPathDepth})`, {
+        path: rel,
+        path_depth: parts.length,
+        max_path_depth: INPUT_LIMITS.maxPathDepth
+      });
+    }
+    if (file.size > INPUT_LIMITS.maxSingleFileBytes) {
+      throw makeValidationError(
+        "file_too_large",
+        `${i18n[state.uiLanguage].errorTooLarge} (${rel}: ${formatBytes(file.size)} > ${formatBytes(INPUT_LIMITS.maxSingleFileBytes)})`,
+        { path: rel, file_size: file.size, max_single_file_bytes: INPUT_LIMITS.maxSingleFileBytes }
+      );
+    }
+    totalBytes += file.size;
+    if (totalBytes > INPUT_LIMITS.maxTotalInputBytes) {
+      throw makeValidationError(
+        "input_too_large",
+        `${i18n[state.uiLanguage].errorTooLarge} (${formatBytes(totalBytes)} > ${formatBytes(INPUT_LIMITS.maxTotalInputBytes)})`,
+        { total_bytes: totalBytes, max_total_input_bytes: INPUT_LIMITS.maxTotalInputBytes }
+      );
+    }
+  }
+
+  if (!hasSkillEntry) {
+    throw makeValidationError("missing_skill_entry", i18n[state.uiLanguage].errorMissingSkill);
+  }
+}
+
+function validateUrlBeforeSubmit(rawUrl) {
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch (_error) {
+    throw makeValidationError("invalid_remote_url", i18n[state.uiLanguage].sourceTypeMissing);
+  }
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw makeValidationError("unsupported_remote_scheme", i18n[state.uiLanguage].errorRemoteHost);
+  }
+  if (parsed.username || parsed.password) {
+    throw makeValidationError("remote_credentials_not_allowed", i18n[state.uiLanguage].errorRemoteCredentials);
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (isUnsafeClientRemoteHost(host)) {
+    throw makeValidationError("unsafe_remote_host", `${i18n[state.uiLanguage].errorRemoteHost} (${host})`, { host });
+  }
+}
+
+function isUnsafeClientRemoteHost(host) {
+  if (!host) return true;
+  if (host === "localhost" || host.endsWith(".local")) return true;
+  if (host === "::1" || host === "[::1]") return true;
+  if (["169.254.169.254", "100.100.100.200"].includes(host)) return true;
+  const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!ipv4Match) return false;
+  const octets = ipv4Match.slice(1).map((value) => Number(value));
+  if (octets.some((value) => Number.isNaN(value) || value < 0 || value > 255)) return true;
+  const [a, b] = octets;
+  return (
+    a === 10 ||
+    a === 127 ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 169 && b === 254) ||
+    a === 0
+  );
+}
+
+function normalizeClientPath(path) {
+  return String(path || "")
+    .replaceAll("\\", "/")
+    .split("/")
+    .filter((part) => part && part !== "." && part !== "..")
+    .join("/");
+}
+
+function makeValidationError(code, message, metadata = {}) {
+  const error = new Error(message);
+  error.code = code;
+  error.metadata = metadata;
+  return error;
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unit = units.shift();
+  while (value >= 1024 && units.length) {
+    value /= 1024;
+    unit = units.shift();
+  }
+  return `${value.toFixed(value >= 10 ? 0 : 1)} ${unit}`;
 }
 
 async function parseApiResponse(response) {

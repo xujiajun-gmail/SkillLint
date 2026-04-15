@@ -25,6 +25,14 @@ def test_app_root_and_health() -> None:
     assert health.json() == {"status": "ok"}
 
 
+def test_app_bundle_contains_client_side_prechecks() -> None:
+    script = client.get("/assets/app.js")
+    assert script.status_code == 200
+    assert "validateDirectoryBeforeSubmit" in script.text
+    assert "validateArchiveBeforeSubmit" in script.text
+    assert "validateUrlBeforeSubmit" in script.text
+
+
 def test_scan_archive_endpoint(tmp_path: Path) -> None:
     skill_dir = tmp_path / "skill"
     skill_dir.mkdir()

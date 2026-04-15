@@ -122,6 +122,7 @@ The web app supports:
 - directory upload
 - remote URL scan
 - input validation hints and clearer validation-error feedback
+- browser-side prechecks for obvious directory/archive/URL validation failures before upload
 - bilingual UI with auto/manual zh/en switching
 - human-readable report, raw JSON, and Markdown output
 - finding-to-source navigation for flagged files
