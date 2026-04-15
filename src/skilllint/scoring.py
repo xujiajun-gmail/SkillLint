@@ -39,6 +39,7 @@ MALICIOUS_RULE_IDS = {
 
 @dataclass(frozen=True)
 class CorrelationPattern:
+    """描述一种“多信号组合后风险升高”的模式。"""
     correlation_id: str
     title: str
     required_rules: frozenset[str]
@@ -163,6 +164,7 @@ def correlate_findings(findings: list[Finding]) -> CorrelationOutcome:
         taxonomies = {f.primary_taxonomy for f in file_findings if f.primary_taxonomy}
 
         for pattern in PATTERNS:
+            # 相关性判断是“required_rules 子集命中”，不关心额外是否还有别的风险。
             if pattern.required_rules.issubset(rules):
                 matched_rules = sorted(pattern.required_rules)
                 hits.append(
@@ -280,6 +282,7 @@ def build_summary(findings: list[Finding], correlation_hits: list[CorrelationHit
 
 
 def build_score_breakdown(findings: list[Finding], correlation_hits: list[CorrelationHit]) -> dict:
+    # score breakdown 既给人看，也给后续调参与评估脚本消费。
     finding_contributions = _finding_score_contributions(findings)
     correlation_contributions = [
         {
@@ -312,6 +315,7 @@ def _finding_score_contributions(findings: list[Finding]) -> list[dict]:
     for finding in findings:
         if finding.engine == "correlation":
             continue
+        # 最终分数 = 严重级别基分 + 引擎 bonus，再乘置信度系数和重复衰减。
         raw = BASE_SEVERITY_SCORE[finding.severity] + ENGINE_BONUS.get(finding.engine, 0)
         weighted = raw * CONFIDENCE_MULTIPLIER.get(finding.confidence, 0.85)
         prior = rule_occurrences[finding.rule_id]
@@ -343,6 +347,7 @@ def _finding_score_contributions(findings: list[Finding]) -> list[dict]:
 
 
 def _correlation_score(findings: list[Finding], correlation_hits: list[CorrelationHit]) -> int:
+    # correlation 分数除了命中模式本身，还会少量考虑“多文件/多 taxonomy 扩散面”。
     score = sum(hit.score for hit in correlation_hits)
     distinct_files = len({f.evidence.file for f in findings if f.evidence.file})
     distinct_taxonomies = len({f.primary_taxonomy for f in findings if f.primary_taxonomy})

@@ -128,6 +128,8 @@ const i18n = {
 };
 
 const state = {
+  // UI 层只维护最小状态：
+  // 当前界面语言、当前输入模式、最近一次扫描响应、当前选中 finding。
   uiLanguage: navigator.language && navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en",
   sourceType: "archive",
   response: null,
@@ -166,6 +168,8 @@ document.querySelectorAll("[data-lang-ui]").forEach((button) => {
 });
 
 document.querySelectorAll(".source-btn").forEach((button) => {
+  // 扫描输入模式（zip / directory / url）切换时，统一走 setSourceType，
+  // 避免显示逻辑散落在多个事件处理器里。
   button.addEventListener("click", () => setSourceType(button.dataset.source));
 });
 
@@ -194,6 +198,8 @@ els.scanForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearError();
   try {
+    // 先抓取当前表单内容，再进入 loading；
+    // 否则某些浏览器在禁用 file input 后会丢失已选目录/文件。
     const responsePromise = submitScan();
     setLoading(true);
     const response = await responsePromise;
@@ -208,6 +214,7 @@ els.scanForm.addEventListener("submit", async (event) => {
 });
 
 async function submitScan() {
+  // 以当前激活 tab 为准重新确认 sourceType，避免 state 与实际 UI 不一致。
   const activeSource = document.querySelector(".source-btn.is-active")?.dataset.source || state.sourceType;
   state.sourceType = activeSource;
   const options = {
@@ -287,6 +294,7 @@ function setSourceType(sourceType) {
     const isActive = pane.dataset.pane === sourceType;
     pane.classList.toggle("is-active", isActive);
     pane.hidden = !isActive;
+    // 加一层内联 display 控制，避免样式缓存或 class 覆盖导致多个 pane 同时显示。
     pane.style.display = isActive ? "grid" : "none";
   });
 }
@@ -398,6 +406,7 @@ function renderSourceViewer() {
   }
 
   if (!finding.evidence.file) {
+    // 某些 finding 是仓库级或语义级命中，没有文件定位，这时退化为详情面板而不是空白。
     els.sourceViewer.innerHTML = renderFindingFallback(finding, dict.noFileLocation);
     return;
   }
@@ -453,6 +462,7 @@ function scrollSourceToFinding(lineStart) {
   const targetLine = container?.querySelector(`[data-line-no="${lineStart}"]`);
   if (!container || !targetLine) return;
   requestAnimationFrame(() => {
+    // 尽量把目标行滚到视口中间，用户更容易同时看到上下文。
     const desiredTop = Math.max(
       0,
       targetLine.offsetTop - container.clientHeight / 2 + targetLine.clientHeight / 2
@@ -462,6 +472,7 @@ function scrollSourceToFinding(lineStart) {
 }
 
 function renderFindingFallback(finding, message) {
+  // 当拿不到完整源码文件时，仍尽量把 finding 的关键信息和 snippet 展示给用户。
   const dict = i18n[state.uiLanguage];
   const snippet = finding.evidence?.snippet;
   const location = finding.evidence?.file

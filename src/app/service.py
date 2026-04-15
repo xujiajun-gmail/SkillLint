@@ -33,6 +33,7 @@ class ScanService:
         return self._scan_target(str(directory_path), options)
 
     def build_uploaded_directory(self, files: list[tuple[str, bytes]]) -> Path:
+        # 把浏览器上传的平铺文件列表重建成临时目录树，供现有扫描链路直接复用。
         temp_dir = Path(tempfile.mkdtemp(prefix="skilllint-app-dir-"))
         for relative_path, content in files:
             safe_path = self._safe_relative_path(relative_path)
@@ -55,6 +56,7 @@ class ScanService:
         source_files: dict[str, SourceFileView] = {}
         workspace_dir = Path(result.workspace.normalized_dir) if result.workspace else None
         if workspace_dir and workspace_dir.exists():
+            # 只回传与 finding 相关的文本文件，避免把整个仓库源码都塞回前端。
             source_files = self._collect_source_files(result, workspace_dir)
 
         self._sanitize_workspace_for_response(result)
@@ -77,6 +79,7 @@ class ScanService:
         cfg.outputs.report_language = options.language
         cfg.engines.dataflow.enabled = options.use_dataflow
         cfg.engines.semantic.use_llm = options.use_llm
+        # Web 端刻意只暴露少量 scan 开关，不把完整 profile/rule filter 面暴露给普通用户。
         return cfg
 
     def _collect_source_files(self, result: ScanResult, workspace_dir: Path) -> dict[str, SourceFileView]:
@@ -119,6 +122,7 @@ class ScanService:
 
 
 def parse_relative_paths(raw: str) -> list[str]:
+    # relative_paths 由前端以 JSON string array 形式传入，这里做统一解析与校验。
     data = json.loads(raw)
     if not isinstance(data, list) or not all(isinstance(item, str) for item in data):
         raise ValueError("relative_paths must be a JSON string array")

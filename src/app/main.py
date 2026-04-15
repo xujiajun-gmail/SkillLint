@@ -14,6 +14,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 
 def create_app() -> FastAPI:
+    # Web app 采用“静态前端 + REST API”一体进程，部署简单，后续也容易拆分。
     app = FastAPI(
         title="SkillLint Web App",
         version="0.2.1",
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
 
     @app.get("/", include_in_schema=False)
     def index() -> FileResponse:
+        # 根路径只返回静态首页，真正的数据请求全部走 /api。
         return FileResponse(STATIC_DIR / "index.html")
 
     return app
@@ -41,6 +43,7 @@ app = create_app()
 
 
 def run() -> None:
+    # skilllint-web 命令最终落到这里。
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=False)
 
 

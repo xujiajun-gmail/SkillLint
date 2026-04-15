@@ -50,6 +50,7 @@ class SemanticEngine(Engine):
         seed_findings = seed_findings or []
         findings: list[Finding] = []
         llm_candidates: list[LLMCandidate] = []
+        # 把前序 finding 先按文件归档，后面做 permission drift 和 LLM seed 时可以就地取用。
         file_seed = defaultdict(list)
         for finding in seed_findings:
             if finding.evidence.file:
@@ -119,6 +120,7 @@ class SemanticEngine(Engine):
         for rule in self.match_rules:
             if not rule.applies_to_path(rel):
                 continue
+            # 语义规则不是直接 regex 命中，而是“分段后判断若干关键词组是否同时成立”。
             match_range = _semantic_rule_match_range(rule, text, self.keyword_groups)
             if match_range is None:
                 continue
@@ -201,6 +203,7 @@ def _semantic_rule_match_range(
     text: str,
     keyword_groups: dict[str, list[str]],
 ) -> tuple[int, int, str] | None:
+    # 以双换行做粗分段，避免把跨整文件的零散关键词错误拼成一次语义命中。
     segments = _segment_ranges(text)
     for start, end in segments:
         segment = text[start:end]
@@ -287,6 +290,8 @@ def _contains_any(text: str, keywords: list[str]) -> bool:
 
 
 def _segment_ranges(text: str) -> list[tuple[int, int]]:
+    # 段落级分片是 semantic engine 的关键降噪手段：
+    # 让“同一段内部语义共现”成为命中前提，而不是全文任意位置共现。
     segments: list[tuple[int, int]] = []
     start = 0
     for chunk in text.split("\n\n"):
@@ -312,6 +317,8 @@ def _permission_drift_supported(
     dangerous_capability_keywords: list[str],
     seed_findings: list[Finding],
 ) -> bool:
+    # permission drift 的核心思想：
+    # 文本自称“只读/无害”，但附近上下文或前序 finding 却显示存在危险能力。
     line_start, _, snippet = _first_matching_line(
         text,
         ["read-only", "only reads", "does not modify", "只读", "仅做读取", "不会修改"],

@@ -21,6 +21,7 @@ def resolve_target(target: str) -> TargetInfo:
 
     parsed = urlparse(target)
     if parsed.scheme in {"http", "https"}:
+        # 这里不要求 URL 一定可达，只做语法层类型判断；真正网络失败会在 workspace 阶段暴露。
         if _looks_like_git_repo(parsed):
             return TargetInfo(raw=target, normalized_type="git", resolved_path=target)
         return TargetInfo(raw=target, normalized_type="url", resolved_path=target)
@@ -30,6 +31,7 @@ def resolve_target(target: str) -> TargetInfo:
 
 def _looks_like_git_repo(parsed) -> bool:
     # 当前只做轻量启发式识别：命中常见 git host，且路径不像直接下载的压缩包。
+    # 这样做的好处是无须发网络请求就能快速区分 git URL 与普通文件 URL。
     if parsed.netloc not in GIT_HOSTS:
         return False
     path_parts = [part for part in parsed.path.split("/") if part]

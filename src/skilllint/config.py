@@ -67,17 +67,24 @@ PROFILE_PRESETS: dict[str, dict[str, Any]] = {
 
 
 class WorkspaceConfig(BaseModel):
+    """工作区相关配置。"""
     root: str = ".skilllint-work"
     keep_artifacts: bool = False
 
 
 class InputsConfig(BaseModel):
+    """输入源相关配置。
+
+    当前主要影响 URL 下载和归档大小约束；后续如果增加对象存储、认证下载等能力，
+    也会沿用这一层。
+    """
     allow_remote: bool = True
     download_timeout_seconds: int = 60
     max_archive_size_mb: int = 100
 
 
 class OutputsConfig(BaseModel):
+    """报告输出配置。"""
     format: str = "both"
     json_file: str = "result.json"
     markdown_file: str = "report.md"
@@ -87,6 +94,7 @@ class OutputsConfig(BaseModel):
 
 
 class EngineSwitch(BaseModel):
+    """单个检测引擎的开关配置。"""
     enabled: bool = True
     use_llm: bool = False
 
@@ -99,6 +107,11 @@ class EnginesConfig(BaseModel):
 
 
 class RulesConfig(BaseModel):
+    """规则筛选配置。
+
+    include/exclude 规则与 taxonomy 会在扫描入口统一转成 RuleSelector，
+    后续各引擎共享同一套裁剪逻辑。
+    """
     include_rule_ids: list[str] = Field(default_factory=list)
     exclude_rule_ids: list[str] = Field(default_factory=list)
     include_taxonomies: list[str] = Field(default_factory=list)
@@ -106,6 +119,7 @@ class RulesConfig(BaseModel):
 
 
 class LLMConfig(BaseModel):
+    """LLM 语义分析配置。"""
     provider: str = "openai"
     base_url: str | None = None
     api_key: str | None = None
@@ -120,6 +134,7 @@ class SeverityConfig(BaseModel):
 
 
 class SkillLintConfig(BaseModel):
+    """SkillLint 顶层配置对象。"""
     version: int = 1
     profile: str = "balanced"
     language: str = "auto"
@@ -137,10 +152,12 @@ class UnknownProfileError(ValueError):
 
 
 def available_profiles() -> list[str]:
+    # 用排序后结果，保证 CLI 展示和测试快照稳定。
     return sorted(PROFILE_PRESETS)
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
+    # 不存在时返回空 dict，便于做“默认配置 + 可选 override”组合。
     if not path.exists():
         return {}
     with path.open("r", encoding="utf-8") as f:
@@ -149,6 +166,9 @@ def _read_yaml(path: Path) -> dict[str, Any]:
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    # 配置采用递归合并：
+    # - dict 与 dict 深合并
+    # - 其他值（包括 list）由 override 整体覆盖
     result = dict(base)
     for key, value in override.items():
         existing = result.get(key)
@@ -178,6 +198,7 @@ def load_config(path: str | Path | None = None, profile: str | None = None) -> S
     if preset is None:
         raise UnknownProfileError(f"Unknown SkillLint profile: {selected_profile}")
 
+    # 合并后强制回写 profile 名称，避免外层只拿到“展开后的配置”而看不到来源 profile。
     merged = _deep_merge(base, preset)
     merged = _deep_merge(merged, override)
     merged["profile"] = selected_profile

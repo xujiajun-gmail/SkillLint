@@ -49,6 +49,7 @@ class RegexRule(RuleMeta):
 
     @property
     def compiled_flags(self) -> int:
+        # 把 YAML 中的 flags 文本在运行时转为 re 常量，规则目录更易维护。
         combined = 0
         for flag_name in self.flags:
             combined |= getattr(re, flag_name.upper(), 0)
@@ -152,6 +153,7 @@ def build_finding(
 
 
 def _load_yaml_resource(package: str, name: str, model: Any) -> Any:
+    # 统一从 package resource 读 YAML，避免调用方关心磁盘相对路径。
     resource = resources.files(package).joinpath(name)
     with resource.open("r", encoding="utf-8") as handle:
         data = yaml.safe_load(handle) or {}

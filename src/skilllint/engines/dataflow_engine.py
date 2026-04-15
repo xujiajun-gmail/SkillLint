@@ -97,6 +97,7 @@ class Taint:
 
 class PythonTaintAnalyzer(ast.NodeVisitor):
     def __init__(self, text: str, rules: dict[str, RuleMeta]) -> None:
+        # taints 记录“变量名 -> taint 来源”，是 Python dataflow 的最小状态存储。
         self.text = text
         self.rules = rules
         self.taints: dict[str, Taint] = {}
@@ -104,6 +105,7 @@ class PythonTaintAnalyzer(ast.NodeVisitor):
         self.current_function_args: set[str] = set()
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        # 进入函数后记录形参名，便于识别“用户输入/外部参数 -> exec”这类路径。
         prev = self.current_function_args.copy()
         self.current_function_args = {arg.arg for arg in node.args.args}
         self.generic_visit(node)
@@ -250,6 +252,7 @@ class DataflowEngine(Engine):
         return findings
 
     def _scan_python(self, path: Path, workspace: PreparedWorkspace) -> list[Finding]:
+        # Python 语法较稳定，因此优先使用 AST 做更可靠的 source/sink 分析。
         try:
             text = read_text(path)
             tree = ast.parse(text)
@@ -262,6 +265,7 @@ class DataflowEngine(Engine):
         return analyzer.findings
 
     def _scan_shell(self, path: Path, workspace: PreparedWorkspace) -> list[Finding]:
+        # shell 脚本解析成本高且方言多，因此用启发式检测典型“source + sink”组合。
         try:
             text = read_text(path)
         except OSError:
@@ -324,6 +328,7 @@ class DataflowEngine(Engine):
 
             params = _js_function_params(line)
             if params is not None:
+                # 记录当前函数形参，便于把 request/body/arg 一类输入视作 taint。
                 function_stack.append((brace_depth + line.count("{"), params))
 
             active_args = function_stack[-1][1] if function_stack else set()
@@ -539,6 +544,7 @@ def _js_taint_for_sink(
 
 
 def _dedupe_line_findings(findings: list[Finding]) -> list[Finding]:
+    # JS/shell 启发式容易在同一行多次触发相同 rule，这里按 rule_id + 行号去重。
     seen: set[tuple[str, str | None, int | None]] = set()
     unique: list[Finding] = []
     for finding in findings:

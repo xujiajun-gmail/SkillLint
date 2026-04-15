@@ -22,6 +22,11 @@ class LLMCandidate:
 
 @dataclass(frozen=True)
 class SemanticLabelSpec:
+    """LLM 可返回的稳定语义标签定义。
+
+    注意这里不是直接暴露内部 rule catalog，而是定义一套对外部模型更容易理解的
+    plain-language labels，再由本地代码映射回 SkillLint 的 taxonomy 与 rule_id。
+    """
     label: str
     title: str
     taxonomy: str
@@ -169,6 +174,7 @@ class LLMAnalyzer:
 
     @property
     def status(self) -> str:
+        # status 主要给上层 metadata / 调试信息使用。
         return self._status
 
     @property
@@ -238,6 +244,7 @@ class LLMAnalyzer:
         return findings
 
     def _get_client(self) -> Any | None:
+        # 优先读取当前 config，再回退到环境变量，便于 CLI / Web 两种入口共享同一实现。
         api_key = self.config.llm.api_key or os.getenv("SKILLLINT_LLM_API_KEY")
         if not api_key:
             self._status = "missing-api-key"
@@ -257,12 +264,14 @@ class LLMAnalyzer:
             kwargs: dict[str, Any] = {"api_key": api_key}
             if base_url:
                 kwargs["base_url"] = base_url
+            # 这里使用 OpenAI-compatible client，方便接标准 OpenAI 与兼容网关。
             self._client = OpenAI(**kwargs)
         return self._client
 
     def _analyze_candidate(self, client: Any, candidate: LLMCandidate) -> dict[str, Any]:
         prompt = _build_prompt(candidate)
         try:
+            # 要求 response_format=json_object，尽量降低解析不稳定性。
             response = client.chat.completions.create(
                 model=self.config.llm.model or os.getenv("SKILLLINT_LLM_MODEL"),
                 temperature=self.config.llm.temperature,
@@ -417,6 +426,7 @@ def _merge_duplicate_findings(left: Finding, right: Finding) -> Finding:
 
 
 def _finding_strength(finding: Finding) -> tuple[int, int]:
+    # 去重合并时优先保留“更高 severity / confidence”的那条 finding。
     confidence_order = {"low": 0, "medium": 1, "high": 2}
     return severity_rank(finding.severity), confidence_order[finding.confidence]
 

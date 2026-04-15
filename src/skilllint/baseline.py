@@ -24,6 +24,7 @@ class ExampleTarget:
 
 
 def load_example_targets(root: Path) -> list[ExampleTarget]:
+    # baseline 语料来自 examples/ 与 examples/zh-community/ 两套索引。
     targets: list[ExampleTarget] = []
     for index_path, community in [
         (root / "examples" / "index.json", "general"),
@@ -53,6 +54,7 @@ def build_baseline_dataset(
     profile: str = "balanced",
     config_path: Path | None = None,
 ) -> dict:
+    # baseline 的目的不是判定恶意，而是形成“当前规则在真实样本上的回归快照”。
     targets = load_example_targets(root)
     cfg = load_config(config_path, profile=profile)
     scanner = SkillScanner(cfg)
@@ -221,6 +223,7 @@ def render_baseline_markdown(dataset: dict) -> str:
 
 
 def _sample_record(target: ExampleTarget, result: ScanResult) -> dict:
+    # sample record 保留最有代表性的聚合字段，避免 baseline JSON 体积过大。
     taxonomy_counts = Counter(
         finding.primary_taxonomy for finding in result.findings if finding.primary_taxonomy
     )

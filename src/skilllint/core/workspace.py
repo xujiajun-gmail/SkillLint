@@ -28,9 +28,11 @@ class PreparedWorkspace:
     extracted_from: str | None = None
 
     def all_files(self) -> list[Path]:
+        # workspace 对外暴露“当前归一化目录下所有文件”的统一视图。
         return iter_files(self.normalized_dir)
 
     def relpath(self, path: Path) -> str:
+        # finding/报告层一律使用相对路径，避免把本机绝对路径泄露到输出里。
         return str(path.relative_to(self.normalized_dir))
 
     def to_model(self) -> WorkspaceInfo:
@@ -62,6 +64,7 @@ def prepare_workspace(target: TargetInfo, config: SkillLintConfig) -> PreparedWo
     elif target.normalized_type == "url":
         downloaded = _download_url(target.resolved_path or target.raw, root_dir, config)
         extracted_from = str(downloaded)
+        # URL 下载后再按文件类型分流：zip 解压，单文件则直接暂存。
         if downloaded.suffix.lower() == ".zip":
             _extract_zip(downloaded, normalized_dir)
         else:
@@ -101,11 +104,13 @@ def _copy_directory(src: Path, dst: Path) -> None:
 
 
 def _extract_zip(zip_path: Path, dst: Path) -> None:
+    # 当前保持简单 extractall；真正的“压缩包内容是否危险”由 package engine 再检查。
     with zipfile.ZipFile(zip_path) as zf:
         zf.extractall(dst)
 
 
 def _download_url(url: str, root_dir: Path, config: SkillLintConfig) -> Path:
+    # 下载逻辑故意保持流式写盘，避免把大文件整体读入内存。
     parsed = urlparse(url)
     filename = Path(parsed.path).name or "downloaded-skill"
     download_path = root_dir / filename
@@ -128,5 +133,6 @@ def _clone_repo(url: str, dst: Path) -> None:
 
 
 def _stage_single_file(path: Path, dst: Path) -> None:
+    # 对非压缩包 URL，统一放入 normalized 根目录，保持后续检测器的遍历入口一致。
     name = path.name or "downloaded-skill"
     shutil.copy2(path, dst / name)

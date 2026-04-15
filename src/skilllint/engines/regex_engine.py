@@ -28,6 +28,7 @@ class RegexEngine(Engine):
         seen: set[tuple[str, str, int, int]] = set()
         per_file_rule_counts: dict[tuple[str, str], int] = {}
         for path in workspace.all_files():
+            # regex engine 只看文本文件，避免在二进制/许可证里制造大量噪声。
             if not path.is_file() or not is_text_file(path):
                 continue
             if path.name in IGNORED_REGEX_FILENAMES:
@@ -43,6 +44,7 @@ class RegexEngine(Engine):
                 if not rule.applies_to_path(rel):
                     continue
                 count_key = (rule.rule_id, rel)
+                # re.finditer 提供所有命中位置，后续再结合 rule 限额、上下文 suppression 做裁剪。
                 for match in re.finditer(rule.pattern, text, rule.compiled_flags):
                     if rule.max_matches_per_file is not None and per_file_rule_counts.get(count_key, 0) >= rule.max_matches_per_file:
                         break
@@ -66,12 +68,18 @@ class RegexEngine(Engine):
                             ),
                         )
                     )
+                    # 大仓库保护阈值：regex 命中太多时提前返回，避免极端样本拖慢整体扫描。
                     if len(findings) > 1000:
                         return findings
         return findings
 
 
 def _is_context_suppressed(rule_id: str, text: str, line_start: int, line_end: int) -> bool:
+    """基于局部上下文压制高频误报。
+
+    regex 的优点是稳定、快，但也最容易把“安全说明文档”误判成真实行为；
+    因此这里用轻量 suppression 对最常见场景做兜底。
+    """
     context = extract_snippet(text, line_start, line_end, radius=1).lower()
     defensive_terms = [
         "must not",

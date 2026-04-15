@@ -32,6 +32,8 @@ TEXT_EXTENSIONS = {
 
 
 def detect_report_language(text: str) -> str:
+    # 报告语言判断采用极简启发式：
+    # 中文字符足够多则输出中文，否则默认英文。
     chinese_chars = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
     english_letters = sum(1 for ch in text if ch.isascii() and ch.isalpha())
     if chinese_chars >= 6 and chinese_chars >= max(english_letters // 8, 1):
@@ -40,6 +42,7 @@ def detect_report_language(text: str) -> str:
 
 
 def detect_language_from_paths(paths: list[Path], max_chars: int = 60000) -> str:
+    # 只抽样文本文件前 max_chars 个字符，避免为了语言检测去完整读取整个仓库。
     chunks: list[str] = []
     total = 0
     for path in paths:
@@ -63,6 +66,7 @@ def detect_language_from_paths(paths: list[Path], max_chars: int = 60000) -> str
 
 
 def dominant_source_language(paths: list[Path]) -> str:
+    # 这里返回“主导源码后缀”，主要用于报告摘要，不做严格语言识别。
     scores = Counter()
     for path in paths:
         ext = path.suffix.lower()

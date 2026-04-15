@@ -9,6 +9,7 @@ console = Console()
 
 
 def render_console_summary(result: ScanResult) -> None:
+    # console summary 是最薄的一层输出：让 CLI 用户先快速判断整体风险。
     table = Table(title="SkillLint Summary")
     table.add_column("Field")
     table.add_column("Value")

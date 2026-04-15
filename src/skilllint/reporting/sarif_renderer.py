@@ -32,6 +32,7 @@ def render_sarif(result: ScanResult, path: str | Path) -> None:
 
 
 def build_sarif_log(result: ScanResult) -> dict:
+    # SARIF 重点服务于代码扫描平台集成，因此把 rule catalog、summary、filters 一并塞入 run.properties。
     rules = [_rule_to_sarif(rule_id, group) for rule_id, group in _group_findings_by_rule(result.findings).items()]
     sarif_results = [_finding_to_sarif(finding) for finding in result.findings]
 
@@ -87,6 +88,7 @@ def _group_findings_by_rule(findings: list[Finding]) -> dict[str, list[Finding]]
 
 
 def _rule_to_sarif(rule_id: str, findings: list[Finding]) -> dict:
+    # 同一个 rule_id 可能对应多条 finding；SARIF 的 rule 描述取第一条 exemplar 即可。
     exemplar = findings[0]
     short_description = exemplar.title
     full_description = exemplar.explanation or exemplar.title
@@ -136,6 +138,7 @@ def _rule_help_markdown(exemplar: Finding, related: list[str]) -> str:
 
 
 def _finding_to_sarif(finding: Finding) -> dict:
+    # SARIF result 尽量保留 SkillLint 专有元数据，便于平台侧二次分析。
     level = LEVEL_MAP.get(finding.severity, "warning")
     message = finding.explanation or finding.title
     result = {

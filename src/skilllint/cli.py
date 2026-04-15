@@ -29,6 +29,8 @@ def main() -> None:
 @app.command("profiles")
 def profiles() -> None:
     """List built-in scanning profiles."""
+    # profiles 命令只负责展示预设，不做加载和校验逻辑；
+    # 真正的 profile 生效顺序由 config.load_config 统一控制。
     table = Table(title="SkillLint Profiles")
     table.add_column("Profile")
     table.add_column("Description")
@@ -114,6 +116,7 @@ def scan(
     cfg.rules.include_taxonomies = sorted({*cfg.rules.include_taxonomies, *enable_taxonomy})
     cfg.rules.exclude_taxonomies = sorted({*cfg.rules.exclude_taxonomies, *disable_taxonomy})
 
+    # resolve_target 只负责“识别输入是什么”，不会在这里做下载/解压/clone。
     resolved = resolve_target(target)
     if resolved.normalized_type == "unknown":
         raise typer.BadParameter(f"Unsupported target: {target}")
@@ -122,6 +125,7 @@ def scan(
     result = SkillScanner(cfg).scan(resolved)
 
     output.mkdir(parents=True, exist_ok=True)
+    # renderer 是纯输出层：不会再改动 finding，只把 ScanResult 投影成不同格式。
     if format in {"json", "both", "all"}:
         render_json(result, output / cfg.outputs.json_file)
     if format in {"markdown", "both", "all"}:
@@ -149,6 +153,7 @@ def evaluate_golden(
     config: Path | None = typer.Option(None, "--config", help="Optional config file override"),
 ) -> None:
     """Evaluate SkillLint against the golden labeled subset."""
+    # evaluate-golden 的目标不是产出最终告警，而是评估当前规则集的回归效果。
     root = Path.cwd()
     try:
         result = evaluate_golden_dataset(

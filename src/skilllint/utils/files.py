@@ -55,6 +55,7 @@ BINARY_EXTENSIONS = {
 
 
 def iter_files(root: Path) -> list[Path]:
+    # 统一文件遍历入口，顺便排除 node_modules/.git 等对扫描价值很低的目录。
     paths: list[Path] = []
     for current, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in IGNORED_DIRS]
@@ -65,6 +66,7 @@ def iter_files(root: Path) -> list[Path]:
 
 
 def is_probably_binary(path: Path) -> bool:
+    # “后缀 + NUL 字节”双重判断，足够应对当前技能样本而不追求完全准确。
     if path.suffix.lower() in BINARY_EXTENSIONS:
         return True
     try:
@@ -84,6 +86,7 @@ def is_text_file(path: Path) -> bool:
 
 
 def read_text(path: Path, max_chars: int = 200000) -> str:
+    # 所有文本读取都做统一截断，避免单个超大文件拖垮扫描与 Web 响应。
     return path.read_text(encoding="utf-8", errors="ignore")[:max_chars]
 
 

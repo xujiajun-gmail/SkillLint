@@ -125,6 +125,8 @@ class PackageEngine(Engine):
         return findings
 
     def _finding(self, rule_id: str, evidence: Evidence | None = None) -> Finding | None:
+        # package engine 内部大量复用“按 rule_id 取 catalog 元数据并构造 finding”的逻辑，
+        # 抽成统一入口可避免每处重复 selector 判断。
         rule = self.rules[rule_id]
         if not self.selector.allows_rule(rule.rule_id, rule.taxonomy):
             return None
@@ -179,6 +181,7 @@ class PackageEngine(Engine):
         return findings
 
     def _scan_python_dependency_manifest(self, path: Path, rel: str) -> list[Finding]:
+        # requirements*.txt 不需要做复杂解析；识别最危险的直连远程依赖即可。
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
         except OSError:
@@ -206,6 +209,7 @@ class PackageEngine(Engine):
         return findings
 
     def _scan_pyproject(self, path: Path, rel: str) -> list[Finding]:
+        # pyproject 的依赖声明形态很多，因此拆到辅助函数里按不同生态逐层遍历。
         if tomllib is None:
             return []
         try:
@@ -327,6 +331,7 @@ class PackageEngine(Engine):
 
 
 def _looks_like_startup_artifact(path: Path) -> bool:
+    # 启动项判断兼顾“文件名命中”和“目录语义命中”。
     lowered_parts = {part.lower() for part in path.parts}
     if path.name in STARTUP_ARTIFACT_NAMES or path.suffix.lower() in STARTUP_ARTIFACT_SUFFIXES:
         return True
@@ -368,6 +373,14 @@ def _leading_spaces(line: str) -> int:
 
 
 def _iter_pyproject_remote_dependencies(data: dict[str, Any]) -> list[tuple[str, str]]:
+    """从 pyproject.toml 中提取远程依赖声明。
+
+    这里覆盖：
+    - PEP 621 project.dependencies
+    - poetry dependencies/group
+    - uv sources
+    - build-system.requires
+    """
     items: list[tuple[str, str]] = []
 
     project = data.get("project")

@@ -17,6 +17,11 @@ Verdict = Literal["safe", "needs_review", "suspicious", "malicious"]
 
 
 class GoldenSample(BaseModel):
+    """黄金样本定义。
+
+    它不是完整 ground truth，而是针对若干关键 verdict / risk / rule / taxonomy
+    约束做人工标注，用来评估当前版本的精确率/召回率风格表现。
+    """
     sample_id: str
     local_path: str
     source_alias: str | None = None
@@ -76,6 +81,7 @@ def evaluate_golden_dataset(
     profile: str | None = None,
     config_path: Path | None = None,
 ) -> GoldenEvaluationResult:
+    # golden evaluation 复用正式扫描链路，避免“评估时走的是另一套逻辑”。
     dataset = load_golden_dataset(dataset_path)
     selected_profile = profile or dataset.profile
     scanner = SkillScanner(load_config(config_path, profile=selected_profile))
@@ -248,6 +254,7 @@ def _update_presence_metrics(
     *,
     present: bool,
 ) -> None:
+    # 对“应出现”和“不应出现”分别累计 TP/FP/FN/TN。
     for label in labels:
         metric = counts[label]
         if present:
