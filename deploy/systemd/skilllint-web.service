@@ -1,0 +1,21 @@
+[Unit]
+Description=SkillLint Web
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/skilllint
+Environment=SKILLLINT_WEB_HOST=0.0.0.0
+Environment=SKILLLINT_WEB_PORT=18110
+Environment=SKILLLINT_WEB_WORKERS=2
+Environment=SKILLLINT_WEB_LOG_LEVEL=info
+ExecStart=/opt/skilllint/.venv/bin/skilllint-web
+Restart=always
+RestartSec=3
+TimeoutStopSec=20
+User=skilllint
+Group=skilllint
+
+[Install]
+WantedBy=multi-user.target

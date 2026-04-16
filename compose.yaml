@@ -1,0 +1,19 @@
+services:
+  skilllint-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: skilllint:latest
+    ports:
+      - "18110:18110"
+    environment:
+      SKILLLINT_WEB_HOST: "0.0.0.0"
+      SKILLLINT_WEB_PORT: "18110"
+      SKILLLINT_WEB_WORKERS: "2"
+      SKILLLINT_WEB_LOG_LEVEL: "info"
+    volumes:
+      - skilllint-work:/app/.skilllint-work
+    restart: unless-stopped
+
+volumes:
+  skilllint-work:

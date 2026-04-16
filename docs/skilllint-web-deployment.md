@@ -87,6 +87,10 @@ skilllint-web --host 0.0.0.0 --port 18110 --workers 2 --log-level info
 
 ## 5. systemd 示例
 
+仓库内已提供示例文件：
+
+- `deploy/systemd/skilllint-web.service`
+
 ```ini
 [Unit]
 Description=SkillLint Web
@@ -108,13 +112,31 @@ WantedBy=multi-user.target
 
 ## 6. Docker 启动示例
 
+仓库内已提供：
+
+- `Dockerfile`
+- `compose.yaml`
+
 ```bash
+docker build -t skilllint:latest .
 docker run --rm -p 18110:18110 \
   -e SKILLLINT_WEB_HOST=0.0.0.0 \
   -e SKILLLINT_WEB_PORT=18110 \
   -e SKILLLINT_WEB_WORKERS=2 \
   skilllint:latest
 ```
+
+也可以直接：
+
+```bash
+docker compose up -d --build
+```
+
+默认 compose 会：
+
+- 暴露 `18110:18110`
+- 使用 `skilllint-work` volume 保存工作目录
+- 以 `unless-stopped` 重启策略运行
 
 ## 7. 安全建议
 

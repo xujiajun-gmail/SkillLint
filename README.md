@@ -141,6 +141,12 @@ skilllint-web
 For public/external deployment, bind to `0.0.0.0` and place the service behind your normal firewall/reverse-proxy setup.
 For more deployment details, see `docs/skilllint-web-deployment.md`.
 
+Deployment artifacts now included in the repo:
+
+- `Dockerfile`
+- `compose.yaml`
+- `deploy/systemd/skilllint-web.service`
+
 The web app supports:
 - zip upload
 - directory upload
