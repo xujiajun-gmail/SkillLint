@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+import os
 from pathlib import Path
 
 import uvicorn
@@ -11,6 +13,8 @@ from fastapi.staticfiles import StaticFiles
 from app.api import router as api_router
 
 STATIC_DIR = Path(__file__).parent / "static"
+DEFAULT_WEB_HOST = "127.0.0.1"
+DEFAULT_WEB_PORT = 18110
 
 
 def create_app() -> FastAPI:
@@ -44,7 +48,31 @@ app = create_app()
 
 def run() -> None:
     # skilllint-web 命令最终落到这里。
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=False)
+    # 启动参数优先级：
+    # 1. CLI args
+    # 2. env vars
+    # 3. defaults
+    parser = argparse.ArgumentParser(prog="skilllint-web", description="Run the SkillLint web app")
+    parser.add_argument("--host", default=None, help=f"Bind host (default: env or {DEFAULT_WEB_HOST})")
+    parser.add_argument("--port", type=int, default=None, help=f"Bind port (default: env or {DEFAULT_WEB_PORT})")
+    args = parser.parse_args()
+
+    env_host = os.getenv("SKILLLINT_WEB_HOST")
+    env_port = os.getenv("SKILLLINT_WEB_PORT")
+
+    host = args.host or env_host or DEFAULT_WEB_HOST
+    port = args.port
+    if port is None and env_port:
+        try:
+            port = int(env_port)
+        except ValueError as exc:
+            raise ValueError(f"Invalid SKILLLINT_WEB_PORT: {env_port}") from exc
+    if port is None:
+        port = DEFAULT_WEB_PORT
+    if not (1 <= port <= 65535):
+        raise ValueError(f"Invalid web port: {port}")
+
+    uvicorn.run("app.main:app", host=host, port=port, reload=False)
 
 
 if __name__ == "__main__":

@@ -115,7 +115,24 @@ pip install -e .[dev]
 skilllint-web
 ```
 
-Then open `http://127.0.0.1:8000`.
+Then open `http://127.0.0.1:18110`.
+
+You can also configure host and port:
+
+```bash
+skilllint-web --host 127.0.0.1 --port 18110
+skilllint-web --host 0.0.0.0 --port 18110
+```
+
+Or by environment variables:
+
+```bash
+export SKILLLINT_WEB_HOST=0.0.0.0
+export SKILLLINT_WEB_PORT=18110
+skilllint-web
+```
+
+For public/external deployment, bind to `0.0.0.0` and place the service behind your normal firewall/reverse-proxy setup.
 
 The web app supports:
 - zip upload
