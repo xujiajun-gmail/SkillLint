@@ -36,6 +36,7 @@ It is intended to produce:
 - Risk flows / attack-chain metadata: `docs/skilllint-risk-flows.md`
 - skill-safe fixture coverage report: `docs/skilllint-skill-safe-coverage-report.md`
 - Input validation model: `docs/skilllint-input-validation.md`
+- Web deployment notes: `docs/skilllint-web-deployment.md`
 - False-positive triage round 1: `docs/skilllint-fp-triage-round1.md`
 - False-positive triage round 2: `docs/skilllint-fp-triage-round2.md`
 - False-positive triage round 3: `docs/skilllint-fp-triage-round3.md`
@@ -122,6 +123,8 @@ You can also configure host and port:
 ```bash
 skilllint-web --host 127.0.0.1 --port 18110
 skilllint-web --host 0.0.0.0 --port 18110
+skilllint-web --host 0.0.0.0 --port 18110 --workers 2 --log-level info
+skilllint-web --reload
 ```
 
 Or by environment variables:
@@ -129,10 +132,14 @@ Or by environment variables:
 ```bash
 export SKILLLINT_WEB_HOST=0.0.0.0
 export SKILLLINT_WEB_PORT=18110
+export SKILLLINT_WEB_RELOAD=false
+export SKILLLINT_WEB_WORKERS=2
+export SKILLLINT_WEB_LOG_LEVEL=info
 skilllint-web
 ```
 
 For public/external deployment, bind to `0.0.0.0` and place the service behind your normal firewall/reverse-proxy setup.
+For more deployment details, see `docs/skilllint-web-deployment.md`.
 
 The web app supports:
 - zip upload
