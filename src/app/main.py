@@ -23,7 +23,7 @@ def create_app() -> FastAPI:
     # Web app 采用“静态前端 + REST API”一体进程，部署简单，后续也容易拆分。
     app = FastAPI(
         title="SkillLint Web App",
-        version="0.2.2",
+        version="0.2.3",
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",
     )

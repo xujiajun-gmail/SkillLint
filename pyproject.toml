@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "skilllint"
-version = "0.2.2"
+version = "0.2.3"
 description = "Security scanner for agent skills"
 readme = "README.md"
 license = { file = "LICENSE" }
